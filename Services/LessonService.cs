@@ -1,9 +1,9 @@
-﻿using EnglishCenter.Data;
-using EnglishCenter.DTO;
-using EnglishCenter.Models;
+﻿using EnglishCenterMVC.Data;
+using EnglishCenterMVC.DTO;
+using EnglishCenterMVC.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public class LessonService : ILessonService
     {
@@ -22,6 +22,7 @@ namespace EnglishCenter.Services
         {
             return await _context.Lessons
                 .Where(l => l.SectionId == sectionId)
+                .Include(l => l.SectionId)
                 .OrderBy(l => l.Order)
                 .ToListAsync();
         }
@@ -109,6 +110,14 @@ namespace EnglishCenter.Services
 
             _context.Lessons.Remove(lesson);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Lesson>> GetLessonsAsync()
+        {
+            return await _context.Lessons
+                .Include(l => l.Section)
+                .OrderBy(l => l.Section.Order)
+                .ToListAsync();
         }
     }
 }

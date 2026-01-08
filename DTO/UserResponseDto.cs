@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography.Pkcs;
 
-namespace EnglishCenter.DTO
+namespace EnglishCenterMVC.DTO
 {
     public class UserResponseDto
     {

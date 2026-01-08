@@ -1,14 +1,14 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using EnglishCenter.Authorization;
-using EnglishCenter.DTO;
-using EnglishCenter.Extensions;
-using EnglishCenter.Models;
+using EnglishCenterMVC.Authorization;
+using EnglishCenterMVC.DTO;
+using EnglishCenterMVC.Extensions;
+using EnglishCenterMVC.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public class AuthService : IAuthService
     {

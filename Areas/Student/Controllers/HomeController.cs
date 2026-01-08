@@ -1,4 +1,4 @@
-﻿using EnglishCenter.Data;
+﻿using EnglishCenterMVC.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers

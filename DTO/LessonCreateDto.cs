@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EnglishCenter.DTO
+namespace EnglishCenterMVC.DTO
 {
     public class LessonCreateDto 
     {

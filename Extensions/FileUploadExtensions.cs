@@ -1,4 +1,4 @@
-﻿namespace EnglishCenter.Extensions
+﻿namespace EnglishCenterMVC.Extensions
 {
     public static class FileUploadExtensions
     {

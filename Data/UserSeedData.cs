@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using EnglishCenter.Authorization;
-using EnglishCenter.Models;
+using EnglishCenterMVC.Authorization;
+using EnglishCenterMVC.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace EnglishCenter.Data
+namespace EnglishCenterMVC.Data
 {
     public static class UserSeedData
     {
@@ -22,7 +22,7 @@ namespace EnglishCenter.Data
                 }
             }
 
-            var adminEmail = "admin@englishcenter.com";
+            var adminEmail = "admin@EnglishCenterMVC.com";
             var adminPassword = "Admin@123";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 

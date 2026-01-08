@@ -1,10 +1,10 @@
 ﻿using System.Data;
-using EnglishCenter.Model;
+using EnglishCenterMVC.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-using EnglishCenter.Models;
-namespace EnglishCenter.Data
+using EnglishCenterMVC.Models;
+namespace EnglishCenterMVC.Data
 {
     public class DataContext : IdentityDbContext<User>
     {

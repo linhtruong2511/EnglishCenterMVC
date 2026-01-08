@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace EnglishCenter.Migrations
+namespace EnglishCenterMVC.Migrations
 {
     /// <inheritdoc />
     public partial class UserIdentity : Migration

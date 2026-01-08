@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using EnglishCenter.Models;
+using EnglishCenterMVC.Models;
 namespace EnglishCenterMVC.Authorization
 {
     public class AppClaimsFactory : UserClaimsPrincipalFactory<User, IdentityRole>

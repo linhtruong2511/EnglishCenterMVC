@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using EnglishCenter.Models;
+using EnglishCenterMVC.Models;
 
-namespace EnglishCenter.Model
+namespace EnglishCenterMVC.Models
+
 {
     public class Course
     {

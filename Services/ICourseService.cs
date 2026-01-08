@@ -1,10 +1,10 @@
-﻿using EnglishCenter.Model;
+﻿using EnglishCenterMVC.Models;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public interface ICourseService
     {
-        Task<IEnumerable<Course>> GetCourses(string? name);
+        Task<IEnumerable<Course>> GetCourses(string? name = "");
         Task<Course> GetCourseById(int id);
         Task<Course> AddCourse(Course course);
         Task<Course> UpdateCourse(int id, Course course);

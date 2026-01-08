@@ -1,6 +1,6 @@
-﻿using EnglishCenter.Models;
+﻿using EnglishCenterMVC.Models;
 
-namespace EnglishCenter.DTO
+namespace EnglishCenterMVC.DTO
 {
     public class SectionCreateDto : Section
     {

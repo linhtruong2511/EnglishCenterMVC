@@ -1,8 +1,8 @@
-﻿using EnglishCenter.Data;
-using EnglishCenter.Model;
+﻿using EnglishCenterMVC.Data;
+using EnglishCenterMVC.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public class CategoryService : ICategoryService
     {

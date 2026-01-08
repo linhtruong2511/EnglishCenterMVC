@@ -1,9 +1,9 @@
-﻿using EnglishCenter.Data;
-using EnglishCenter.Extensions;
-using EnglishCenter.Model;
+﻿using EnglishCenterMVC.Data;
+using EnglishCenterMVC.Extensions;
+using EnglishCenterMVC.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public class CourseService : ICourseService
     {
@@ -74,6 +74,9 @@ namespace EnglishCenter.Services
             {
                 course.Name = data.Name;
                 course.Description = data.Description;
+                course.Price = data.Price;
+                course.Sale = data.Sale;
+
                 context.Update(course); 
                 context.SaveChanges();
 
