@@ -3,7 +3,7 @@
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
     bool openFirst = false;
 }
-@model IEnumerable<EnglishCenter.Models.Section>
+@model IEnumerable<EnglishCenterMVC.Models.Section>
 
 <div class="sec-wrap container-fluid">
     <div class="sec-head">
@@ -26,7 +26,7 @@
         {
             idx++;
 
-            var lessons = s.Lessons ?? new List<EnglishCenter.Models.Lesson>();
+            var lessons = s.Lessons ?? new List<EnglishCenterMVC.Models.Lesson>();
             var total = lessons.Count;
 
             var completed = 0;
@@ -79,7 +79,7 @@
                                     @* UI only for now; wire to progress later *@
                                     <input class="check disabled" type="checkbox" title="Mark completed" />
 
-                                    <a class="open-btn" asp-area="Student" asp-controller="Section" asp-action="Lesson" asp-route-id="@l.Id"> Open </a>
+                                    <a class="open-btn" asp-area="Student" asp-controller="Lesson" asp-action="Index" asp-route-id="@l.Id"> Open </a>
                                 </div>
                             </div>
                         }

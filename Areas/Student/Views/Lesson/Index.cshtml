@@ -1,4 +1,4 @@
-﻿@model EnglishCenter.Models.Lesson
+﻿@model EnglishCenterMVC.Models.Lesson
 @{
     ViewData["Title"] = Model?.Title ?? "Lesson";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
@@ -13,7 +13,7 @@
     string MediaSrc(string? url) => string.IsNullOrWhiteSpace(url) ? "" : Url.Content(url);
 }
 
-<div class="wrap">
+<div class="wrap container-fluid">
 
     <!-- HERO -->
     <div class="hero">
