@@ -50,17 +50,17 @@ namespace EnglishCenterMVC.Services
 
             if (dto.File != null)
             {
-                var fileUrl = await fileService.SaveFileAsync(dto.File, "/files/lessons"); 
+                var fileUrl = await fileService.SaveFileAsync(dto.File, "files/lessons"); 
                 lesson.fileUrl = fileUrl;
             }
             if (dto.Image != null)
             {
-                var imageUrl = await fileService.SaveImageAsync(dto.Image, "/images/lessons"); 
+                var imageUrl = await fileService.SaveImageAsync(dto.Image, "images/lessons"); 
                 lesson.imageUrl = imageUrl;
             }
             if (dto.Video != null)
             {
-                var videoUrl = await fileService.SaveVideoAsync(dto.Video, "/videos/lessons"); 
+                var videoUrl = await fileService.SaveVideoAsync(dto.Video, "videos/lessons"); 
                 lesson.videoUrl = videoUrl;
             }
             
