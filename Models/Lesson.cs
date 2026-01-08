@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EnglishCenter.Models
+namespace EnglishCenterMVC.Models
+
 {
     public class Lesson
     {

@@ -1,6 +1,6 @@
-using EnglishCenter.Data;
-using EnglishCenter.Models;
-using EnglishCenter.Services;
+using EnglishCenterMVC.Data;
+using EnglishCenterMVC.Models;
+using EnglishCenterMVC.Services;
 using EnglishCenterMVC.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EnglishCenter.Data;
-using EnglishCenter.Model;
+using EnglishCenterMVC.Data;
+using EnglishCenterMVC.Models;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {

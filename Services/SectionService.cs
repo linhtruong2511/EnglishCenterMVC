@@ -1,8 +1,8 @@
-﻿using EnglishCenter.Data;
-using EnglishCenter.Models;
+﻿using EnglishCenterMVC.Data;
+using EnglishCenterMVC.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public class SectionService : ISectionService
     {
@@ -17,6 +17,14 @@ namespace EnglishCenter.Services
         {
             return await _context.Sections
                 .Where(s => s.CourseId == courseId)
+                .Include(s => s.Lessons.OrderBy(o => o.Order))
+                .OrderBy(s => s.Order)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Section>> GetSectionsAsync()
+        {
+            return await _context.Sections
                 .Include(s => s.Lessons.OrderBy(o => o.Order))
                 .OrderBy(s => s.Order)
                 .ToListAsync();

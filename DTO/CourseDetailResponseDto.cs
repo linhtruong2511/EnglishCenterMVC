@@ -1,4 +1,4 @@
-﻿namespace EnglishCenter.DTO
+﻿namespace EnglishCenterMVC.DTO
 {
     public class CourseDetailResponseDto
     {

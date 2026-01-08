@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public class FileService : IFileService
     {

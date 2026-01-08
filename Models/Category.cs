@@ -1,4 +1,4 @@
-﻿namespace EnglishCenter.Model
+﻿namespace EnglishCenterMVC.Models
 {
     public class Category
     {

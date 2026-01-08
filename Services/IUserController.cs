@@ -1,4 +1,4 @@
-﻿namespace EnglishCenter.Services
+﻿namespace EnglishCenterMVC.Services
 {
     public interface IUserController
     {

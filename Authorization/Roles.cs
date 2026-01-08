@@ -1,4 +1,4 @@
-﻿namespace EnglishCenter.Authorization
+﻿namespace EnglishCenterMVC.Authorization
 {
     public enum Roles
     {

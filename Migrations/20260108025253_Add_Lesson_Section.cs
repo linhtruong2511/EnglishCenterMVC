@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace EnglishCenter.Migrations
+namespace EnglishCenterMVC.Migrations
 {
     /// <inheritdoc />
     public partial class Add_Lesson_Section : Migration

@@ -1,9 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using EnglishCenter.DTO;
-using EnglishCenter.Models;
+using EnglishCenterMVC.DTO;
+using EnglishCenterMVC.Models;
 
-namespace EnglishCenter.Services
+namespace EnglishCenterMVC.Services
 {
     public interface IAuthService
     {

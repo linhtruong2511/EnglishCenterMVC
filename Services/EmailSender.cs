@@ -1,8 +1,9 @@
 ﻿
 using System.Net;
 using System.Net.Mail;
+using WebBanMayTinh.Services;
 
-namespace WebBanMayTinh.Services
+namespace EnglishCenterMVC.Services
 {
     public class EmailSender : IEmailSender
     {
