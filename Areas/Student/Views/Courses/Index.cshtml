@@ -2,65 +2,172 @@
 
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<div class="course-wrap container-fluid">
+    <div class="course-top">
+        <div class="course-title">
+            <h2>My Courses</h2>
+            <div class="muted">Pick up where you left off. Keep the momentum — boring consistency wins.</div>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sale)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sale)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <div class="course-actions">
+            <div class="searchbox">
+                <input id="courseSearch" type="search" placeholder="Search courses..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="chip active" type="button" data-filter="all">All</button>
+        <button class="chip" type="button" data-filter="cat-1">TOEIC</button>
+        <button class="chip" type="button" data-filter="cat-3">IELTS Academic</button>
+        <button class="chip" type="button" data-filter="cat-4">IELTS General</button>
+        <button class="chip" type="button" data-filter="cat-2">Combo đặc biệt</button>
+        <button class="chip" type="button" data-filter="cat-5">Tiếng Anh cơ bản</button>
+        <button class="chip" type="button" data-filter="cat-6">HSK</button>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty">
+            <strong>No courses assigned yet.</strong>
+            <div class="muted">Once you enroll, your courses will show up here.</div>
+        </div>
+    }
+    else
+    {
+        <div id="courseGrid" class="grid">
+            @foreach (var item in Model)
+            {
+                // Use Category.Id for filtering (per your table)
+                var catId = item.Category?.Id ?? 0;
+                var categoryKey = $"cat-{catId}";
+                var categoryName = item.Category?.Name ?? "Unknown";
+                var price = item.Price;
+                var salePct = item.Sale; // assume % (0-100)
+                var hasSale = salePct != null && salePct > 0;
+                var finalPrice = hasSale ? price * (decimal)(100 - (decimal)salePct) / 100m : price;
+
+                <div class="cardx course-card"
+                     data-name="@(item.Name ?? "")"
+                     data-category="@categoryKey"
+                     data-desc="@(item.Description ?? "")">
+
+                    <div class="thumb">
+                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Name" />
+                        }
+                        else
+                        {
+                            <span class="muted">No image</span>
+                        }
+                    </div>
+
+                    <div class="body">
+                        <div class="name">@item.Name</div>
+                        <div class="desc">@item.Description</div>
+
+                        <div class="meta">
+                            <span class="pill">@categoryName</span>
+
+                            @switch (catId)
+                            {
+                                case 1:
+                                    <span class="pill">TOEIC</span>
+                                    break;
+                                case 3:
+
+                                    <span class="pill">IELTS Academic</span>
+                                    break;
+                                case 4:
+
+                                    <span class="pill">IELTS General</span>
+                                    break;
+                                case 2:
+
+                                    <span class="pill">Combo</span>
+                                    break;
+                                case 5:
+
+                                    <span class="pill">Basic</span>
+                                    break;
+                                case 6:
+
+                                    <span class="pill">HSK</span>
+                                    break;
+                            }
+
+                            @if (hasSale)
+                            {
+                                <span class="pill">On Sale</span>
+                            }
+                        </div>
+
+                        <div class="price-row">
+                            <div class="price">
+                                @finalPrice.ToString("N0")
+                                @if (hasSale)
+                                {
+                                    <span class="old">@price.ToString("N0")</span>
+                                }
+                            </div>
+                            @if (hasSale)
+                            {
+                                <span class="sale">-@salePct%</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="btnrow">
+                        <a class="btnx primary" asp-controller="Section" asp-action="Index" asp-route-courseId="@item.Id">Open</a>
+                        <a class="btnx" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    }
+</div>
+
+<script>
+    // Simple client-side search + category filter (baseline; swap to server-side later if needed)
+    (function () {
+        const search = document.getElementById("courseSearch");
+        const grid = document.getElementById("courseGrid");
+        const chips = document.querySelectorAll(".chip");
+
+        if (!grid) return;
+
+        let activeFilter = "all";
+
+        function applyFilter() {
+            const q = (search?.value || "").trim().toLowerCase();
+            const cards = grid.querySelectorAll(".course-card");
+
+            cards.forEach(card => {
+                const name = (card.getAttribute("data-name") || "").toLowerCase();
+                const desc = (card.getAttribute("data-desc") || "").toLowerCase();
+                const cat = (card.getAttribute("data-category") || "").toLowerCase();
+
+                const matchText = !q || name.includes(q) || desc.includes(q);
+                const matchCat = activeFilter === "all" || cat === activeFilter;
+
+                card.style.display = (matchText && matchCat) ? "" : "none";
+            });
+        }
+        if (search) {
+            search.addEventListener("input", applyFilter);
+        }
+        chips.forEach(btn => {
+            btn.addEventListener("click", () => {
+                chips.forEach(x => x.classList.remove("active"));
+                btn.classList.add("active");
+                activeFilter = btn.getAttribute("data-filter");
+                applyFilter();
+            });
+        });
+    })();
+</script>

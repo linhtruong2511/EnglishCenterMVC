@@ -1,0 +1,148 @@
+﻿.dash-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .dash-topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .dash-title h2 { margin:0; font-weight:800; letter-spacing:-0.5px; }
+    .dash-title p { margin:4px 0 0; opacity:.75; }
+    .dash-actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+    /* Main 3-column grid like Duolingo center area */
+    .dash-grid { display:grid; grid-template-columns: 2fr 1fr 1fr; gap:16px; }
+    @media (max-width: 992px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    .cardx { background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:14px; padding:16px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
+    .cardx h5 { margin:0 0 10px; font-weight:800; }
+    .muted { opacity:.7; font-size:.92rem; }
+
+    /* Center-left blocks */
+    .progress-list { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .progress-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .bar { height:10px; background:rgba(0,0,0,.06); border-radius:999px; overflow:hidden; flex:1; }
+    .bar > span { display:block; height:100%; width:0%; background:rgba(0,0,0,.75); border-radius:999px; }
+    .tag { font-size:.78rem; border:1px solid rgba(0,0,0,.1); padding:4px 8px; border-radius:999px; white-space:nowrap; }
+
+    .split { display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:16px; }
+    @media (max-width: 992px) { .split { grid-template-columns: 1fr; } }
+
+    /* Daily goal mini card */
+    .goal-grid { display:grid; grid-template-columns: 1fr; gap:10px; }
+    .goal-line { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+
+    /* Words learned chart placeholder */
+    .chart-box { height:160px; border-radius:12px; background:rgba(0,0,0,.04); display:flex; align-items:center; justify-content:center; }
+    .chart-box span { opacity:.6; font-size:.95rem; }
+
+    /* League */
+    .league-list { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .league-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,.08); }
+    .league-left { display:flex; align-items:center; gap:10px; }
+    .avatar { width:34px; height:34px; border-radius:999px; background:rgba(0,0,0,.10); display:inline-block; }
+    .rank { width:28px; font-weight:800; text-align:center; opacity:.75; }
+
+    /* Right rail */
+    .profile { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .profile-main { display:flex; align-items:center; gap:12px; }
+    .profile .avatar { width:44px; height:44px; }
+    .pillrow { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .pill { padding:6px 10px; border-radius:999px; background:rgba(0,0,0,.05); font-size:.82rem; }
+
+    .friends { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .friend { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .friend-left { display:flex; align-items:center; gap:10px; }
+    .btnx { border:1px solid rgba(0,0,0,.12); background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
+    .btnx.primary { background:rgba(0,0,0,.85); color:#fff; border-color:transparent; }
+
+
+.course-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .course-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:16px; }
+    .course-title h2 { margin:0; font-weight:900; letter-spacing:-0.5px; }
+    .course-title .muted { opacity:.75; margin-top:4px; }
+
+    .course-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .searchbox { min-width: 260px; max-width: 360px; width: 100%; }
+    .searchbox input { width:100%; border-radius:12px; border:1px solid rgba(0,0,0,.12); padding:10px 12px; }
+
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+    .chip { border:1px solid rgba(0,0,0,.12); border-radius:999px; padding:6px 10px; font-size:.85rem; background:#fff; cursor:pointer; }
+    .chip.active { background: rgba(0,0,0,.85); color:#fff; border-color:transparent; }
+
+    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
+    @media (max-width: 992px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+    .cardx { background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:16px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.04); display:flex; flex-direction:column; }
+    .thumb { height: 150px; background: rgba(0,0,0,.05); display:flex; align-items:center; justify-content:center; }
+    .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .body { padding:14px 14px 12px; display:flex; flex-direction:column; gap:10px; flex:1; }
+    .name { font-weight:900; font-size:1.05rem; line-height:1.25; }
+    .desc { opacity:.75; font-size:.92rem; line-height:1.35; max-height: 2.7em; overflow:hidden; }
+    .meta { display:flex; gap:8px; flex-wrap:wrap; }
+    .pill { background:rgba(0,0,0,.05); border-radius:999px; padding:6px 10px; font-size:.8rem; }
+
+    .price-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; }
+    .price { font-weight:900; }
+    .price .old { opacity:.6; text-decoration:line-through; font-weight:700; margin-left:8px; }
+    .sale { font-size:.8rem; border:1px solid rgba(0,0,0,.12); border-radius:999px; padding:4px 8px; opacity:.85; }
+
+    .btnrow { display:flex; gap:10px; padding:12px 14px 14px; border-top:1px solid rgba(0,0,0,.06); }
+    .btnx { flex:1; border:1px solid rgba(0,0,0,.12); background:#fff; border-radius:12px; padding:10px 12px; text-align:center; text-decoration:none; font-weight:700; }
+    .btnx.primary { background: rgba(0,0,0,.85); color:#fff; border-color:transparent; }
+    .empty { border:1px dashed rgba(0,0,0,.18); border-radius:16px; padding:18px; opacity:.8; background: rgba(0,0,0,.02); }
+
+    .cd-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .cd-grid { display:grid; grid-template-columns: 2.2fr 1fr; gap:16px; align-items:start; }
+    @media (max-width: 992px){ .cd-grid{ grid-template-columns:1fr; } }
+
+    .cardx { background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:16px; box-shadow:0 2px 10px rgba(0,0,0,.04); }
+
+    /* Hero (left) */
+    .hero { border-radius:16px; overflow:hidden; background: linear-gradient(135deg, rgba(10,35,70,1), rgba(16,90,160,1)); color:#fff; }
+    .hero-inner { padding:22px; display:grid; grid-template-columns: 1.3fr 1fr; gap:16px; align-items:center; }
+    @media (max-width: 992px){ .hero-inner{ grid-template-columns:1fr; } }
+
+    .hero h1 { margin:0; font-weight:900; letter-spacing:-0.6px; font-size:2.1rem; line-height:1.15; }
+    .hero p { margin:12px 0 0; opacity:.9; line-height:1.6; }
+    .chips { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    .chip { background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); padding:8px 12px; border-radius:12px; font-size:.9rem; }
+    .hero-meta { display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; opacity:.95; }
+    .meta-item { display:flex; align-items:center; gap:8px; }
+    .dot { width:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.6); }
+
+    .thumb { border-radius:14px; overflow:hidden; background: rgba(255,255,255,.10); min-height: 220px; display:flex; align-items:center; justify-content:center; }
+    .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .thumb .muted { opacity:.8; }
+
+    /* Right: Purchase / info card */
+    .side { padding:18px; }
+    .price { font-weight:900; font-size:2rem; letter-spacing:-0.4px; }
+    .old { opacity:.75; text-decoration:line-through; font-weight:700; margin-top:6px; }
+    .sale-badge { float:right; margin-top:4px; background:#fff; color:#d00; border-radius:10px; padding:6px 10px; font-weight:900; font-size:.85rem; }
+    .divider { border:none; border-top:1px solid rgba(0,0,0,.08); margin:14px 0; }
+
+    .side h4 { margin:0 0 10px; font-weight:900; }
+    .info-list { display:flex; flex-direction:column; gap:10px; margin:0; padding:0; list-style:none; }
+    .info-item { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .info-left { display:flex; align-items:center; gap:10px; }
+    .icon { width:18px; height:18px; border-radius:5px; background: rgba(0,0,0,.08); display:inline-block; }
+
+    /* Tabs + sections */
+    .tabs { margin-top:16px; background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:14px; padding:10px; display:flex; gap:8px; flex-wrap:wrap; }
+    .tab { border:none; background:transparent; padding:10px 12px; border-radius:12px; font-weight:800; cursor:pointer; opacity:.75; }
+    .tab.active { background: rgba(0,0,0,.06); opacity:1; }
+
+    .section { margin-top:16px; padding:18px; }
+    .section h3 { margin:0 0 12px; font-weight:900; letter-spacing:-0.3px; }
+    .benefits { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; }
+    @media (max-width: 992px){ .benefits{ grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 520px){ .benefits{ grid-template-columns: 1fr;} }
+    .benefit { padding:14px; border:1px solid rgba(0,0,0,.08); border-radius:14px; background: rgba(0,0,0,.02); display:flex; gap:12px; align-items:flex-start; }
+    .benefit .bicon { width:44px; height:44px; border-radius:999px; background: rgba(0,0,0,.06); flex:0 0 auto; }
+    .benefit .btitle { font-weight:900; margin-bottom:4px; }
+
+    /* Student CTA buttons (NOT admin actions) */
+    .btnx { display:inline-block; width:100%; text-align:center; border-radius:14px; padding:14px 12px; font-weight:900; text-decoration:none; border:1px solid rgba(0,0,0,.12); background:#fff; }
+    .btnx.primary { background: rgba(240,85,85,1); border-color: transparent; color:#fff; }
+    .btnx.secondary { margin-top:10px; }
+    .hint { opacity:.7; font-size:.9rem; margin-top:10px; line-height:1.5; }
+
+    /* Hide/Show tab content */
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }

@@ -7,37 +7,37 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EnglishCenter.Data;
 using EnglishCenter.Model;
+using EnglishCenter.Services;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
     [Area("Student")]
     public class CoursesController : Controller
     {
-        private readonly DataContext _context;
+        ICourseService courseService;
+        ICategoryService categoryService;
 
-        public CoursesController(DataContext context)
+        public CoursesController(ICourseService course)
         {
-            _context = context;
+            this.courseService = course;
         }
 
         // GET: Student/Courses
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string name = "")
         {
-            var dataContext = _context.Courses.Include(c => c.Category);
-            return View(await dataContext.ToListAsync());
+            var course = await courseService.GetCourses(name);
+            return View(course);
         }
 
         // GET: Student/Courses/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var course = await _context.Courses
-                .Include(c => c.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var course = await courseService.GetCourseById(id);
             if (course == null)
             {
                 return NotFound();
@@ -47,9 +47,9 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         }
 
         // GET: Student/Courses/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(string name = "")
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id");
             return View();
         }
 
@@ -58,32 +58,31 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,ImageUrl,Price,Sale,CategoryId")] Course course)
+        public async Task<IActionResult> Create(Course course, string name = "")
         {
             if (ModelState.IsValid)
             {
-                _context.Add(course);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await courseService.AddCourse(course);
+                return RedirectToAction(nameof(Index)); 
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", course.CategoryId);
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id", course.CategoryId);
             return View(course);
         }
 
         // GET: Student/Courses/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id, string name = "")
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var course = await _context.Courses.FindAsync(id);
+            var course = await courseService.GetCourseById(id);
             if (course == null)
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", course.CategoryId);
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id", course.CategoryId);
             return View(course);
         }
 
@@ -92,7 +91,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageUrl,Price,Sale,CategoryId")] Course course)
+        public async Task<IActionResult> Edit(int id, Course course, string name = "")
         {
             if (id != course.Id)
             {
@@ -103,8 +102,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             {
                 try
                 {
-                    _context.Update(course);
-                    await _context.SaveChangesAsync();
+                    await courseService.UpdateCourse(id ,course);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,27 +117,19 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", course.CategoryId);
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id", course.CategoryId);
             return View(course);
         }
 
         // GET: Student/Courses/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
-            var course = await _context.Courses
-                .Include(c => c.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return View(course);
+            await courseService.DeleteCourse(id);
+            return View();
         }
 
         // POST: Student/Courses/Delete/5
@@ -147,19 +137,21 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            var course = await courseService.GetCourseById(id);
             if (course != null)
             {
-                _context.Courses.Remove(course);
+                await courseService.DeleteCourse(id);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CourseExists(int id)
         {
-            return _context.Courses.Any(e => e.Id == id);
+            var course = courseService.GetCourseById(id);
+
+            if (course is null) return false;
+            else return true;
         }
     }
 }

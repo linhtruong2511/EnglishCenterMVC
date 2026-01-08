@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+    bool openFirst = false;
+}
+@model IEnumerable<EnglishCenter.Models.Section>
+
+<div class="sec-wrap container-fluid">
+    <div class="sec-head">
+        <div>
+            <h2>Sections</h2>
+            <div class="sub">Open a section to see lessons.</div>
+        </div>
+
+        <div class="top-actions">
+            <a class="btnx" asp-area="Student" asp-controller="Courses" asp-action="Index">Back</a>
+        </div>
+    </div>
+
+    <div class="panel">
+        @{
+            int idx = 0;
+        }
+
+        @foreach (var s in Model)
+        {
+            idx++;
+
+            var lessons = s.Lessons ?? new List<EnglishCenter.Models.Lesson>();
+            var total = lessons.Count;
+
+            var completed = 0;
+            int totalMinutes = 0;
+            foreach (var l in lessons)
+            {
+            }
+
+            <details class="section" @(openFirst && idx == 1 ? "open" : "") >
+                <summary class="sec-summary">
+                    <div class="sec-left align-content-center justify-content-between">
+                        <div style="min-width:0;">
+                            <div class="sec-title">@s.Name</div>
+                            <div class="sec-meta">
+                                <span class="text-muted">@s.Description</span>
+                                <span>•</span>
+                                <span>@completed/@total</span>
+                            </div>
+                        </div>
+
+                        <div class="chev">˅</div>
+                    </div>
+                </summary>
+
+                <div class="lessons">
+                    @if (!lessons.Any())
+                    {
+                        <div class="lesson-row" style="color: var(--muted);">
+                            No lessons in this section yet.
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var l in lessons.OrderBy(x => x.Order))
+                        {
+                            // Rename fields here if your Lesson model differs
+                            var lessonName = l.Title ?? $"Lesson {l.Id}";
+                            var durationText = "— phút";
+
+                            <div class="lesson-row">
+                                <div class="l-left">
+                                    <div class="l-ico">&lt;/&gt;</div>
+                                    <div class="l-text">
+                                        <div class="l-name" title="@lessonName">@lessonName</div>
+                                        <div class="l-sub">@durationText</div>
+                                    </div>
+                                </div>
+
+                                <div class="l-right">
+                                    @* UI only for now; wire to progress later *@
+                                    <input class="check disabled" type="checkbox" title="Mark completed" />
+
+                                    <a class="open-btn" asp-area="Student" asp-controller="Section" asp-action="Lesson" asp-route-id="@l.Id"> Open </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </details>
+        }
+    </div>
+</div>

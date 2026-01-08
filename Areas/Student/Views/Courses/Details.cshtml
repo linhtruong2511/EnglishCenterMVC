@@ -1,55 +1,233 @@
 ﻿@model EnglishCenter.Model.Course
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+    var price = Model.Price;
+    var salePct = Model.Sale; 
+    var hasSale = salePct != null && salePct > 0;
+    var finalPrice = hasSale ? price * (decimal)(100 - (decimal)salePct) / 100m : price;
+
+    var categoryName = Model.Category?.Name ?? "Unknown";
+    var categoryId = Model.Category?.Id ?? 0;
 }
 
-<h1>Details</h1>
+<div class="cd-wrap">
+    <div class="cd-grid">
+        <!-- LEFT: HERO -->
+        <div class="hero cardx">
+            <div class="hero-inner">
+                <div>
+                    <h1>@Model.Name</h1>
+                    <p>@Model.Description</p>
 
-<div>
-    <h4>Course</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Sale)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Sale)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Id)
-        </dd>
-    </dl>
+                    <div class="chips">
+                        <span class="chip">Category: @categoryName (ID: @categoryId)</span>
+                        @if (hasSale)
+                        {
+                            <span class="chip">Discount: -@salePct%</span>
+                        }
+                        <span class="chip">Thời hạn: Vô hạn</span>
+                    </div>
+
+                    <div class="hero-meta">
+                        <div class="meta-item"><span class="dot"></span><span>~ 32 hours</span></div>
+                        <div class="meta-item"><span class="dot"></span><span>49 readings</span></div>
+                        <div class="meta-item"><span class="dot"></span><span>13 videos</span></div>
+                        <div class="meta-item"><span class="dot"></span><span>6 tests</span></div>
+                    </div>
+                </div>
+
+                <div class="thumb">
+                    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Name" />
+                    }
+                    else
+                    {
+                        <span class="muted">No image</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: STUDENT VIEW CLASS (pricing block) -->
+        <div class="cardx side">
+            @if (hasSale)
+            {
+                <span class="sale-badge">-@salePct%</span>
+            }
+
+            <div class="price">@finalPrice.ToString("N0")đ</div>
+            @if (hasSale)
+            {
+                <div class="old">@price.ToString("N0") đ</div>
+            }
+
+            <hr class="divider" />
+
+            <h4>Course Information</h4>
+            <ul class="info-list">
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Study time</span></div>
+                    <strong>32 giờ học</strong>
+                </li>
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Readings</span></div>
+                    <strong>49 bài đọc</strong>
+                </li>
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Videos</span></div>
+                    <strong>13 video</strong>
+                </li>
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Quizzes</span></div>
+                    <strong>6 bài kiểm tra</strong>
+                </li>
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Practice</span></div>
+                    <strong>57 bài luyện</strong>
+                </li>
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Access</span></div>
+                    <strong>Truy cập trọn đời</strong>
+                </li>
+                <li class="info-item">
+                    <div class="info-left"><span class="icon"></span><span>Certificate</span></div>
+                    <strong>Hoàn thành 80%</strong>
+                </li>
+            </ul>
+
+            <hr class="divider" />
+
+            <a class="btnx primary" asp-controller="Section" asp-action="Index" asp-route-courseId="@Model.Id">Bắt đầu vào học</a>
+            <a class="btnx secondary" asp-action="Index">Quay lại</a>
+
+            <div class="hint">
+                Tip: if you’re already enrolled, this button should take you to the next unfinished lesson.
+                If you’re not enrolled, your colleague can route it to “Enroll” behind the scenes.
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs row -->
+    <div class="tabs" role="tablist" aria-label="Course tabs">
+        <button class="tab active" type="button" data-tab="intro">Giới thiệu</button>
+        <button class="tab" type="button" data-tab="syllabus">Giáo trình</button>
+        <button class="tab" type="button" data-tab="reviews">Đánh giá</button>
+        <button class="tab" type="button" data-tab="cert">Chứng chỉ</button>
+        <button class="tab" type="button" data-tab="coupons">Mã ưu đãi của tôi</button>
+    </div>
+
+    <!-- Intro -->
+    <div class="cardx section tab-pane active" id="tab-intro">
+        <h3>Quyền lợi của học viên</h3>
+        <div class="benefits">
+            <div class="benefit">
+                <div class="bicon"></div>
+                <div>
+                    <div class="btitle">Nhận chứng chỉ</div>
+                    <div class="muted">Hoàn thành 80% khoá học để nhận chứng chỉ.</div>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="bicon"></div>
+                <div>
+                    <div class="btitle">Thi định kỳ</div>
+                    <div class="muted">Bài kiểm tra theo chủ đề để khóa kiến thức.</div>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="bicon"></div>
+                <div>
+                    <div class="btitle">Truy cập linh hoạt</div>
+                    <div class="muted">Học mọi lúc mọi nơi, theo tiến độ cá nhân.</div>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="bicon"></div>
+                <div>
+                    <div class="btitle">Nhiều phần quà</div>
+                    <div class="muted">Nhận thưởng khi hoàn thành các mốc.</div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider" />
+
+        <h3>Nội dung khoá học</h3>
+        <div class="muted">
+            @* Placeholder: your colleague can replace with real syllabus fields *@
+            • Giới thiệu • Kỹ thuật cốt lõi • Bài tập thực hành • Giải thích chi tiết • Tổng kết
+        </div>
+
+        <hr class="divider" />
+
+        <h3>Ai nên tham gia?</h3>
+        <ul class="muted" style="margin:0; padding-left:18px; line-height:1.8;">
+            <li>Học viên muốn cải thiện kỹ năng theo lộ trình rõ ràng.</li>
+            <li>Người đang luyện thi theo mục tiêu (TOEIC/IELTS/HSK...).</li>
+            <li>Người cần môi trường học có bài tập + đánh giá thường xuyên.</li>
+        </ul>
+    </div>
+
+    <!-- Syllabus -->
+    <div class="cardx section tab-pane" id="tab-syllabus">
+        <h3>Giáo trình</h3>
+        <div class="muted">
+            Placeholder: show modules / lessons list here (sections, lessons, duration).
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="cardx section tab-pane" id="tab-reviews">
+        <h3>Đánh giá</h3>
+        <div class="muted">
+            Placeholder: show average rating + comments. (Students only view; posting review can be gated.)
+        </div>
+    </div>
+
+    <!-- Certificate -->
+    <div class="cardx section tab-pane" id="tab-cert">
+        <h3>Chứng chỉ</h3>
+        <div class="muted">
+            Placeholder: certificate rules, progress %, and “View certificate” when eligible.
+        </div>
+    </div>
+
+    <!-- Coupons -->
+    <div class="cardx section tab-pane" id="tab-coupons">
+        <h3>Mã ưu đãi của tôi</h3>
+        <div class="muted">
+            Placeholder: list available coupons for this student.
+        </div>
+    </div>
+
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<script>
+    (function () {
+        const tabs = document.querySelectorAll(".tab");
+        const panes = {
+            intro: document.getElementById("tab-intro"),
+            syllabus: document.getElementById("tab-syllabus"),
+            reviews: document.getElementById("tab-reviews"),
+            cert: document.getElementById("tab-cert"),
+            coupons: document.getElementById("tab-coupons")
+        };
+
+        tabs.forEach(t => {
+            t.addEventListener("click", () => {
+                tabs.forEach(x => x.classList.remove("active"));
+                t.classList.add("active");
+
+                const key = t.getAttribute("data-tab");
+                Object.values(panes).forEach(p => p.classList.remove("active"));
+                if (panes[key]) panes[key].classList.add("active");
+
+                // Optional: scroll to tabs section on mobile
+                // document.querySelector(".tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        });
+    })();
+</script>

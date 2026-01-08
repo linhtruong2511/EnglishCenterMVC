@@ -1,0 +1,117 @@
+﻿@model EnglishCenter.Models.Lesson
+@{
+    ViewData["Title"] = Model?.Title ?? "Lesson";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+    var heroImg = Model.imageUrl;
+    var videoUrl = Model.videoUrl;
+    var videoTitle = Model.videoTitle;
+    var fileUrl = Model.fileUrl;
+    var fileTitle = Model.fileTitle;
+
+    // Make relative URLs work nicely
+    string HeroSrc(string? url) => string.IsNullOrWhiteSpace(url) ? "" : Url.Content(url);
+    string MediaSrc(string? url) => string.IsNullOrWhiteSpace(url) ? "" : Url.Content(url);
+}
+
+<div class="wrap">
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-bg"
+             style="background-image:url('@HeroSrc(heroImg)'); @(string.IsNullOrWhiteSpace(heroImg) ? "background: linear-gradient(135deg,#0b2b55,#0e5aa8);" : "")">
+        </div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <div>
+                <h1 class="hero-title">@Model.Title</h1>
+                <div class="hero-sub">
+                    <span class="pill">Section: @Model.SectionId</span>
+                    <span class="pill">Order: @Model.Order</span>
+                    @if (!string.IsNullOrWhiteSpace(videoTitle))
+                    {
+                        <span class="pill">@videoTitle</span>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <a class="pill" asp-area="Student" asp-controller="Section" asp-action="Index" asp-route-id="@Model.SectionId">
+                    Back to Section
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <!-- LEFT: VIDEO + DESCRIPTION -->
+        <div>
+            <div class="cardx video-card">
+                <div class="video-head">
+                    <h3>Lesson Video</h3>
+                    <div class="muted">Focus mode: on.</div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(videoUrl))
+                {
+                    <div class="ratio">
+                        <video controls preload="metadata">
+                            <source src="@MediaSrc(videoUrl)" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                }
+                else
+                {
+                    <div class="muted" style="padding:14px; border:1px dashed var(--border); border-radius:16px;">
+                        No video for this lesson yet.
+                    </div>
+                }
+            </div>
+
+            <div class="cardx desc-card">
+                <h4>Description</h4>
+                <div class="desc">@Model.Description</div>
+
+                @if (!string.IsNullOrWhiteSpace(fileUrl))
+                {
+                    <hr style="border:none;border-top:1px solid var(--border); margin:14px 0;" />
+                    <h4>Materials</h4>
+                    <a class="btnx" href="@MediaSrc(fileUrl)" target="_blank">
+                        Download: @(string.IsNullOrWhiteSpace(fileTitle) ? "Attachment" : fileTitle)
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT: META / ACTIONS -->
+        <div class="cardx side">
+            <h4>Lesson Info</h4>
+
+            <div class="rowx">
+                <span class="muted">Title</span>
+                <strong style="text-align:right;">@Model.Title</strong>
+            </div>
+            <div class="rowx">
+                <span class="muted">SectionId</span>
+                <strong>@Model.SectionId</strong>
+            </div>
+            <div class="rowx">
+                <span class="muted">Order</span>
+                <strong>@Model.Order</strong>
+            </div>
+
+            <a class="btnx primary"
+               asp-area="Student"
+               asp-controller="Section"
+               asp-action="Index"
+               asp-route-id="@Model.SectionId">
+                Continue Course
+            </a>
+
+            @* Later you can wire this to progress tracking *@
+            <a class="btnx" href="javascript:void(0)">Mark as Completed</a>
+        </div>
+    </div>
+</div>
