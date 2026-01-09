@@ -7,7 +7,8 @@ namespace EnglishCenterMVC.Services
     {
         Task<IEnumerable<Assignment>> GetAssignmentsAsync(int courseId);
         Task<IEnumerable<Assignment>> GetAssignmentsAsync();
-
+        Task<Assignment> GetAssignmentAsync(int id);
+        Task<string> GetAssignmentContentAsync(int assignmentId); // Trả về đường dẫn file bài tập
 
         Task<Assignment> AddAssignmentAsync(AssignmentCreateVM assignment);
         Task<Assignment> UpdateAssignmentAsync(int id, AssignmentUpdateVM assignment);

@@ -11,5 +11,6 @@ namespace EnglishCenterMVC.Areas.Admin.Models
         public IFormFile File { get; set; }
         [Required(ErrorMessage = "Yêu cầu phải có thời gian hết hạn")]
         public DateTime Deadline { get; set; }
+        public int CourseId { get; set; }
     }
 }

@@ -38,7 +38,8 @@ namespace EnglishCenterMVC.Services
                 FileUrl = fileUrl,
                 Deadline = assignment.Deadline,
                 CreateAt = DateTime.Now,
-                UpdateAt = DateTime.Now
+                UpdateAt = DateTime.Now,
+                CourseId = assignment.CourseId,
             };
 
             context.Assignments.Add(entity);
@@ -65,17 +66,34 @@ namespace EnglishCenterMVC.Services
         async Task<IEnumerable<Assignment>> IAssignmentService.GetAssignmentsAsync()
         {
             return await context.Assignments
-                .Where(a => a.Deadline <= DateTime.Now)
+                //.Where(a => a.Deadline <= DateTime.Now)
+                .Include(a => a.Course)
                 .OrderByDescending(x => x.CreateAt)
                 .ToListAsync();
+        }
+
+        async Task<Assignment> IAssignmentService.GetAssignmentAsync(int id)
+        {
+            var assignment =  await context.Assignments
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (assignment is null) throw new Exception($"Không tìm thấy bài tập có id = {id}");
+            return assignment;
         }
 
         async Task<IEnumerable<Assignment>> IAssignmentService.GetAssignmentsAsync(int courseId)
         {
             return await context.Assignments
-                .Where(a => a.CourseId == courseId && a.Deadline <= DateTime.Now)
+                .Where(a => a.CourseId == courseId && a.Deadline >= DateTime.Now)
                 .OrderByDescending(x => x.CreateAt)
                 .ToListAsync();
+        }
+
+        async Task<string> IAssignmentService.GetAssignmentContentAsync(int assignmentId)
+        {
+            var assignment = await context.Assignments.FindAsync(assignmentId);
+            if (assignment is null) throw new Exception("Không tìm thấy bài tập");
+            if (assignment.Deadline <= DateTime.Now) throw new Exception("Bài tập đã quá hạn nộp");
+            return assignment.FileUrl;
         }
 
         async Task<Assignment> IAssignmentService.UpdateAssignmentAsync(int id, AssignmentUpdateVM assignment)

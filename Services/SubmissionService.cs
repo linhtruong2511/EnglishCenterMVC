@@ -8,16 +8,15 @@ namespace EnglishCenterMVC.Services
     {
         private readonly DataContext context;
         private readonly IFileService fileService;
-        private readonly IGradingService gradingService;
+        //private readonly IGradingService gradingService;
 
         public SubmissionService(
         DataContext context,
-        IFileService fileService,
-        IGradingService gradingService)
+        IFileService fileService)
         {
             this.context = context;
             this.fileService = fileService;
-            this.gradingService = gradingService;
+            //this.gradingService = gradingService;
         }
 
         public async Task<Submission> SubmitAssignment(
@@ -55,7 +54,7 @@ namespace EnglishCenterMVC.Services
             context.Submissions.Add(submission);
             await context.SaveChangesAsync();
 
-            await gradingService.RequestGrading(submission.Id);
+            //await gradingService.RequestGrading(submission.Id);
 
             return submission;
         }
