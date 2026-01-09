@@ -94,7 +94,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                 Title = assignment.Title,
                 Description = assignment.Description,
                 FileUrl = assignment.FileUrl,
-                Type = assignment.Type,
+                Type = assignment.TypeSubmit,
                 Deadline = assignment.Deadline,
                 CourseId = assignment.CourseId,
             });

@@ -34,8 +34,10 @@ namespace EnglishCenterMVC.Services
             if (DateTime.Now > assignment.Deadline)
                 throw new Exception("Đã quá hạn nộp bài");
 
+            
+
             // Kiểm tra định dạng file nộp
-            ValidateFileType(file, assignment.Type);
+            ValidateFileType(file, assignment.TypeSubmit);
 
 
             var fileUrl = await fileService.SaveFileAsync(

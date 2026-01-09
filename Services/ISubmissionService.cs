@@ -5,9 +5,9 @@ namespace EnglishCenterMVC.Services
     public interface ISubmissionService
     {
         Task<Submission> SubmitAssignment(
-        int assignmentId,
-        string userId,
-        IFormFile file);
+            int assignmentId,
+            string userId,
+            IFormFile file);
 
         Task<Submission> GradeSubmission(
             int submissionId,
