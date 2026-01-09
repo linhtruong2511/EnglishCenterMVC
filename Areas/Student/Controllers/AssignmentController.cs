@@ -8,12 +8,14 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
     public class AssignmentController : Controller
     {
         IAssignmentService assignmentService;
+        ICourseService courseService;
 
-        public AssignmentController(IAssignmentService assignmentService)
+        public AssignmentController(IAssignmentService assignmentService, ICourseService courseService)
         {
             this.assignmentService = assignmentService;
+            this.courseService = courseService;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int courseId)
         {
             try
             {
@@ -24,14 +26,13 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
                 return BadRequest();
             }
         }
-
-        public async Task<IActionResult> Details(int courseId)
+        public async Task<IActionResult> Details(int id)
         {
-            if (courseId <= 0) return BadRequest();
+            if(id <= 0) return BadRequest();
             try
             {
-                var assigned = await assignmentService.GetAssignmentsAsync(courseId);
-                return View(assigned);
+                var content = await assignmentService.GetAssignmentAsync(id);
+                return View(content);
             } catch
             {
                 return NotFound();
