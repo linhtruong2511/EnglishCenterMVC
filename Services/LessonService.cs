@@ -45,7 +45,9 @@ namespace EnglishCenterMVC.Services
                 SectionId = dto.SectionId,
                 Title = dto.Title,
                 Description = dto.Description,
-                Order = dto.Order ?? _context.Sections.Count() + 1,
+                Order = dto.Order ?? _context.Lessons
+                    .Where(l => l.SectionId == dto.SectionId)
+                    .Count() + 1,
             };
 
             if (dto.File != null)

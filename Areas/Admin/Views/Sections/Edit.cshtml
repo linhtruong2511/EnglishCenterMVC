@@ -1,88 +1,107 @@
 ﻿@model SectionUpdateVM
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Section";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var lessons = ViewBag.Lessons as IEnumerable<Lesson>;
 }
 
-<h1>Edit</h1>
+<div class="container-fluid">
+    <div class="row g-3">
+        <!-- LEFT: EDIT FORM -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header fw-semibold">
+                    Thông tin Section
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Lessons" />
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
 
-<h4>Section</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Order" class="control-label"></label>
-                <input asp-for="Order" class="form-control" />
-                <span asp-validation-for="Order" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CourseId" class="control-label"></label>
-                <select asp-for="CourseId" class="form-control" asp-items="ViewBag.CourseId"></select>
-                <span asp-validation-for="CourseId" class="text-danger"></span>
-            </div>
-            <div class="form-group text-end mt-2">
-                <a asp-action="Index">Back to List</a>
-                <a asp-action="Create" asp-controller="Lessons" asp-route-sectionId="@Model.Id" class="btn btn-secondary">Tạo bài học</a>
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
 
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label asp-for="Order" class="form-label"></label>
+                                <input asp-for="Order" class="form-control" />
+                                <span asp-validation-for="Order" class="text-danger small"></span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label asp-for="CourseId" class="form-label"></label>
+                                <select asp-for="CourseId" class="form-select" asp-items="ViewBag.CourseId"></select>
+                                <span asp-validation-for="CourseId" class="text-danger small"></span>
+                            </div>
+                        </div>
 
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <a asp-action="Index" class="text-decoration-none">← Back</a>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Create" asp-controller="Lessons" asp-route-sectionId="@Model.Id" class="btn btn-outline-secondary btn-sm">+ Bài học</a>
+                                <button type="submit" class="btn btn-primary btn-sm">Lưu</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-<div class="card mt-2">
-    <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        Tên
-                    </th>
-                    <th>
-                        Mô tả
-                    </th>
-                    <th>
-                        Thứ tự
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.Lessons)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Order)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-controller="Lessons" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-controller="Lessons" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-controller="Lessons" asp-route-id="@item.Id">Delete</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <!-- RIGHT: LESSON LIST -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Danh sách bài học</span>
+                    <span class="badge bg-secondary">@(lessons?.Count() ?? 0)</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (lessons is null || !lessons.Any())
+                    {
+                        <div class="p-4 text-muted text-center">Chưa có bài học</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tên</th>
+                                        <th>Mô tả</th>
+                                        <th class="text-center">Thứ tự</th>
+                                        <th class="text-end">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in lessons)
+                                    {
+                                        <tr>
+                                            <td class="fw-medium">@item.Title</td>
+                                            <td class="text-muted small">@item.Description</td>
+                                            <td class="text-center">@item.Order</td>
+                                            <td class="text-end">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-action="Edit" asp-controller="Lessons" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                                                    <a asp-action="Details" asp-controller="Lessons" asp-route-id="@item.Id" class="btn btn-outline-info">View</a>
+                                                    <a asp-action="Delete" asp-controller="Lessons" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>

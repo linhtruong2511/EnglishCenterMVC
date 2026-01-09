@@ -57,15 +57,28 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Course course, string name = "")
+        public async Task<IActionResult> Create(CourseCreateVM vm, string name = "")
         {
             if (ModelState.IsValid)
             {
-                
+                var course = new Course
+                {
+                    Name = vm.Name,
+                    Description = vm.Description,
+                    Price = vm.Price,
+                    Sale = vm.Sale,
+                    CategoryId = vm.CategoryId,
+                };
+                if (vm.Image is not null)
+                {
+                    var imageUrl = await _fileService.SaveImageAsync(vm.Image, "images/courses");
+                    course.ImageUrl = imageUrl;
+                }
+                await _courseService.AddCourse(course);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(await _categoryService.GetCategories(name), "Id", "Name", course.CategoryId);
-            return View(course);
+            ViewData["CategoryId"] = new SelectList(await _categoryService.GetCategories(), "Id", "Name", vm.CategoryId);
+            return View(vm);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -89,6 +102,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                 CategoryId = course.CategoryId,
                 Price = course.Price,
                 Sale = course.Sale,
+                ImageURL = course.ImageUrl
             });
         }
 
@@ -99,7 +113,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
             if (id != vm.Id)
             {
                 return NotFound();
-            }
+                }
 
             if (ModelState.IsValid)
             {
@@ -113,12 +127,14 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                         CategoryId = vm.CategoryId,
                         Price = vm.Price,
                         Sale = vm.Sale,
+                        ImageUrl = vm.ImageURL
                     };
                     if (vm.Image is not null)
                     {
-                        var imageUrl = await _fileService.SaveFileAsync(vm.Image, "images/course");
+                        var imageUrl = await _fileService.SaveImageAsync(vm.Image, "images/courses");
                         course.ImageUrl = imageUrl;
                     }
+
                     await _courseService.UpdateCourse(id, course);
                 }
                 catch (DbUpdateConcurrencyException)

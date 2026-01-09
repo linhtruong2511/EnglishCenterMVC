@@ -26,14 +26,25 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
             this.sectionService = sectionService;
             this.courseService = courseService;
         }
-
-        public async Task<IActionResult> Index(int courseId)
+        [HttpGet]
+        public async Task<IActionResult> Index(int? courseId)
         {
-            var sections = await sectionService.GetSectionsAsync(courseId);
+            IEnumerable<Section> sections;
+
+            if (courseId.HasValue)
+            {
+                sections = await sectionService.GetSectionsAsync(courseId.Value);
+            }
+            else
+            {
+                sections = await sectionService.GetSectionsAsync();
+            }
+
+
             ViewData["CourseId"] = new SelectList(await courseService.GetCourses(), "Id", "Name");
             return View(sections);
         }
-
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,15 +69,22 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Section section)
+        public async Task<IActionResult> Create(SectionCreateVM vm)
         {
             if (ModelState.IsValid)
             {
+                var section = new Section
+                {
+                    Name = vm.Name,
+                    Description = vm.Description,
+                    CourseId = vm.CourseId,
+                    Order = vm.Order
+                };
                 await sectionService.AddSectionAsync(section);
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CourseId"] = new SelectList(await courseService.GetCourses(), "Id", "Name");
-            return View(section);
+            return View(vm);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -82,6 +100,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                 return NotFound();
             }
             ViewData["CourseId"] = new SelectList(await courseService.GetCourses(), "Id", "Name");
+            ViewBag.Lessons = section.Lessons;
             return View(new SectionUpdateVM
             {
                 Id = section.Id,
@@ -89,7 +108,6 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                 Description = section.Description,
                 Order = section.Order,
                 CourseId = section.CourseId,
-                Lessons = section.Lessons,
             });
         }
 
@@ -97,6 +115,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, SectionUpdateVM vm)
         {
+            ViewBag.Lessons = vm.Lessons;
             if (id != vm.Id)
             {
                 return NotFound();
@@ -114,7 +133,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                         Order = vm.Order,
                     };
 
-                    await sectionService.UpdateSectionAsync(id, section);
+                    section = await sectionService.UpdateSectionAsync(id, section);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

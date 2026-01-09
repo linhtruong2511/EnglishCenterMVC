@@ -41,6 +41,7 @@ namespace EnglishCenterMVC.Services
         async Task<Course> ICourseService.GetCourseById(int id)
         {
             var course = await context.Courses
+                .Include(c => c.Category)
                 .Include(c => c.Sections.OrderBy(s => s.Order))
                     .ThenInclude(s => s.Lessons.OrderBy(l => l.Order))
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -76,6 +77,7 @@ namespace EnglishCenterMVC.Services
                 course.Description = data.Description;
                 course.Price = data.Price;
                 course.Sale = data.Sale;
+                course.ImageUrl = data.ImageUrl;
 
                 context.Update(course); 
                 context.SaveChanges();
