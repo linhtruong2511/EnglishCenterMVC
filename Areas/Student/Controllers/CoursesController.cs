@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EnglishCenterMVC.Data;
 using EnglishCenterMVC.Models;
 using EnglishCenterMVC.Services;
 
@@ -17,27 +12,27 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         ICourseService courseService;
         ICategoryService categoryService;
 
-        public CoursesController(ICourseService course)
+        public CoursesController(ICourseService course,
+            ICategoryService category)
         {
             this.courseService = course;
+            this.categoryService = category;
         }
 
-        // GET: Student/Courses
         public async Task<IActionResult> Index(string name = "")
         {
             var course = await courseService.GetCourses(name);
             return View(course);
         }
 
-        // GET: Student/Courses/Details/5
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var course = await courseService.GetCourseById(id);
+            var course = await courseService.GetCourseById(id.Value);
             if (course == null)
             {
                 return NotFound();
@@ -46,52 +41,44 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             return View(course);
         }
 
-        // GET: Student/Courses/Create
-        public async Task<IActionResult> Create(string name = "")
+        public async Task<IActionResult> Create()
         {
-            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id");
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(), "Id", "Id");
             return View();
         }
 
-        // POST: Student/Courses/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Course course, string name = "")
+        public async Task<IActionResult> Create(Course course)
         {
             if (ModelState.IsValid)
             {
                 await courseService.AddCourse(course);
                 return RedirectToAction(nameof(Index)); 
             }
-            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id", course.CategoryId);
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(), "Id", "Id", course.CategoryId);
             return View(course);
         }
 
-        // GET: Student/Courses/Edit/5
-        public async Task<IActionResult> Edit(int id, string name = "")
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var course = await courseService.GetCourseById(id);
+            var course = await courseService.GetCourseById(id.Value);
             if (course == null)
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id", course.CategoryId);
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(), "Id", "Id", course.CategoryId);
             return View(course);
         }
 
-        // POST: Student/Courses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Course course, string name = "")
+        public async Task<IActionResult> Edit(int id, Course course)
         {
             if (id != course.Id)
             {
@@ -117,22 +104,20 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(name), "Id", "Id", course.CategoryId);
+            ViewData["CategoryId"] = new SelectList(await categoryService.GetCategories(), "Id", "Id", course.CategoryId);
             return View(course);
         }
 
-        // GET: Student/Courses/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-            await courseService.DeleteCourse(id);
+            await courseService.DeleteCourse(id.Value);
             return View();
         }
 
-        // POST: Student/Courses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
