@@ -8,16 +8,15 @@ namespace EnglishCenterMVC.Services
     {
         private readonly DataContext context;
         private readonly IFileService fileService;
-        private readonly IGradingService gradingService;
+        //private readonly IGradingService gradingService;
 
         public SubmissionService(
         DataContext context,
-        IFileService fileService,
-        IGradingService gradingService)
+        IFileService fileService)
         {
             this.context = context;
             this.fileService = fileService;
-            this.gradingService = gradingService;
+            //this.gradingService = gradingService;
         }
 
         public async Task<Submission> SubmitAssignment(
@@ -35,8 +34,10 @@ namespace EnglishCenterMVC.Services
             if (DateTime.Now > assignment.Deadline)
                 throw new Exception("Đã quá hạn nộp bài");
 
+            
+
             // Kiểm tra định dạng file nộp
-            ValidateFileType(file, assignment.Type);
+            ValidateFileType(file, assignment.TypeSubmit);
 
 
             var fileUrl = await fileService.SaveFileAsync(
@@ -55,7 +56,7 @@ namespace EnglishCenterMVC.Services
             context.Submissions.Add(submission);
             await context.SaveChangesAsync();
 
-            await gradingService.RequestGrading(submission.Id);
+            //await gradingService.RequestGrading(submission.Id);
 
             return submission;
         }
