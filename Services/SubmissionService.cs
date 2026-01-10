@@ -34,12 +34,29 @@ namespace EnglishCenterMVC.Services
             if (DateTime.Now > assignment.Deadline)
                 throw new Exception("Đã quá hạn nộp bài");
 
-            
-
-            // Kiểm tra định dạng file nộp
             ValidateFileType(file, assignment.TypeSubmit);
 
+            var existingSubmission = await context.Submissions
+                .Where(s => s.UserId == userId && s.AssignmentId == assignmentId)
+                .FirstAsync();
 
+            if (existingSubmission is not null)
+            {
+                if (!assignment.AllowResubmit)
+                    throw new Exception("Bài tập này không được phép nộp lại");
+                else
+                {
+                    existingSubmission.FileUrl = await fileService.SaveFileAsync(
+                        file,
+                        $"submissions/{assignmentId}/{userId}");
+                    existingSubmission.SubmittedAt = DateTime.Now;
+                    existingSubmission.Score = 0;
+                    context.Update(existingSubmission);
+                    await context.SaveChangesAsync();
+                    return existingSubmission;
+                }
+
+            }
             var fileUrl = await fileService.SaveFileAsync(
                 file,
                 $"submissions/{assignmentId}/{userId}");
@@ -78,11 +95,21 @@ namespace EnglishCenterMVC.Services
             return submission;
         }
 
+        public async Task<IEnumerable<Submission>> GetSubmissions()
+        {
+            return await context.Submissions
+                .Include(x => x.User)
+                .Include(x => x.Assignment)
+                .OrderByDescending(x => x.SubmittedAt)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Submission>> GetSubmissionsByAssignment(int assignmentId)
         {
             return await context.Submissions
                 .Where(x => x.AssignmentId == assignmentId)
                 .Include(x => x.User)
+                .Include(x => x.Assignment)
                 .OrderByDescending(x => x.SubmittedAt)
                 .ToListAsync();
         }

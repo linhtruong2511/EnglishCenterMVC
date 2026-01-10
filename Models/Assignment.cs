@@ -13,6 +13,7 @@
 
         public bool IsDeleted { get; set; }
         public bool AllowResubmit { get; set; }
+
         public DateTime Deadline { get; set; }
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime UpdateAt { get; set; }

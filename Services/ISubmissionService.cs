@@ -14,6 +14,7 @@ namespace EnglishCenterMVC.Services
             int score,
             string feedback);
 
+        Task<IEnumerable<Submission>> GetSubmissions();
         Task<IEnumerable<Submission>> GetSubmissionsByAssignment(int assignmentId);
 
         Task<IEnumerable<Submission>> GetSubmissionsByStudent(string userId);
