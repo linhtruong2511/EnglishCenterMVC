@@ -66,7 +66,16 @@ namespace EnglishCenterMVC.Services
         async Task<IEnumerable<Assignment>> IAssignmentService.GetAssignmentsAsync()
         {
             return await context.Assignments
-                //.Where(a => a.Deadline <= DateTime.Now)
+                .Where(a => a.Deadline > DateTime.Now)
+                .Include(a => a.Course)
+                .OrderByDescending(x => x.CreateAt)
+                .ToListAsync();
+        }
+
+        async Task<IEnumerable<Assignment>> IAssignmentService.GetOverdueAssignmentsAsync()
+        {
+            return await context.Assignments
+                .Where(a => a.Deadline <= DateTime.Now)
                 .Include(a => a.Course)
                 .OrderByDescending(x => x.CreateAt)
                 .ToListAsync();
@@ -118,6 +127,19 @@ namespace EnglishCenterMVC.Services
 
             await context.SaveChangesAsync();
             return entity;
+        }
+
+        async Task<int> IAssignmentService.GetNewlyUploadedAssignmentsAsync()
+        {
+            return await context.Assignments
+                .Where(a => (a.CreateAt - DateTime.Now).TotalDays < 3)
+                .CountAsync();
+        }
+        async Task<int> IAssignmentService.GetAvailableAssignmentsAsync()
+        {
+            return await context.Assignments
+                .Where(a => a.Deadline > DateTime.Now)
+                .CountAsync();
         }
     }
 }

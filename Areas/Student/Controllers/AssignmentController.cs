@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using EnglishCenterMVC.Areas.Student.Models;
 using EnglishCenterMVC.Services;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
@@ -19,13 +20,22 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         {
             try
             {
-                var assignments = await assignmentService.GetAssignmentsAsync();
-                return View(assignments);
+                var availableAssignments = await assignmentService.GetAssignmentsAsync();
+                var overdueAssignments = await assignmentService.GetOverdueAssignmentsAsync();
+                var newlyUploaded = availableAssignments.Where(a => (a.CreateAt - DateTime.Now).TotalDays <= 3).Count();
+                return View(new AssignmentVM
+                {
+                    Available = availableAssignments.Count(),
+                    AvailableAssignments = availableAssignments,
+                    OverdueAssignments = overdueAssignments,
+                    NewlyUploaded = newlyUploaded
+                });
             } catch
             {
                 return BadRequest();
             }
         }
+
         public async Task<IActionResult> Details(int id)
         {
             if(id <= 0) return BadRequest();

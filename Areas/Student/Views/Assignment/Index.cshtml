@@ -5,24 +5,24 @@
 
     // “Newly uploaded” = created in last 3 days (tweak as you want)
     var newWindowDays = 3;
-    var newlyUploaded = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
-        .Where(a => (now - a.CreateAt).TotalDays <= newWindowDays)
-        .OrderByDescending(a => a.CreateAt)
-        .ToList();
-    var available = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
-        .Where(a => a.Deadline >= now)
-        .OrderBy(a => a.CreateAt)
-        .ToList();
-    var overdue = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
-        .Where(a => a.Deadline < now)
-        .OrderByDescending(a => a.Deadline)
-        .ToList();
-    var onlineNew = newlyUploaded.Where(a => !string.IsNullOrWhiteSpace(a.FileUrl)).ToList();
-    var onlineAvailable = available.Where(a => !string.IsNullOrWhiteSpace(a.FileUrl)).ToList();
+    // var newlyUploaded = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
+    //     .Where(a => (now - a.CreateAt).TotalDays <= newWindowDays)
+    //     .OrderByDescending(a => a.CreateAt)
+    //     .ToList();
+    // var available = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
+    //     .Where(a => a.Deadline >= now)
+    //     .OrderBy(a => a.CreateAt)
+    //     .ToList();
+    // var overdue = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
+    //     .Where(a => a.Deadline < now)
+    //     .OrderByDescending(a => a.Deadline)
+    //     .ToList();
+    // var onlineNew = newlyUploaded.Where(a => !string.IsNullOrWhiteSpace(a.FileUrl)).ToList();
+    // var onlineAvailable = available.Where(a => !string.IsNullOrWhiteSpace(a.FileUrl)).ToList();
     string FriendlyType(string? t) => string.IsNullOrWhiteSpace(t) ? "Submission" : t.Trim();
-    var overdueAll = overdue; // already computed
+    // var overdueAll = overdue; already computed
 }
-@model IEnumerable<EnglishCenterMVC.Models.Assignment>
+@model AssignmentVM
 
 <head>
     <link rel="stylesheet" href="~/css/ass.css" />
@@ -36,9 +36,9 @@
                     <div class="hero-title">Study, study more, study forever!</div>
                     <div class="hero-sub">Tập hợp bài tập tự học. Hãy hoàn thành trước hạn nộp!</div>
                     <div class="pillrow">
-                        <span class="pill">Mới đăng lên: @newlyUploaded.Count</span>
-                        <span class="pill">Có sẵn: @available.Count</span>
-                        <span class="pill">Quá hạn: @overdue.Count</span>
+                        <span class="pill">Mới đăng lên: @Model.NewlyUploaded</span>
+                        <span class="pill">Có sẵn: @Model.Available</span>
+                        <span class="pill">Quá hạn: @Model.OverdueAssignments.Count()</span>
                     </div>
                 </div>
                 <div class="pill">Student Area</div>
@@ -76,129 +76,95 @@
             </button>
         </div>
 
-        <section id="panel-online" class="tab-panel" role="tabpanel" aria-labelledby="tab-online">
-            <div class="grid">
-                <!-- LEFT -->
-                    <!-- Newly uploaded (ONLINE only) -->
-                    <div class="cardx card-pad">
-                        <div class="hrow">
-                            <h3>Danh sách bài</h3>
-                            <div class="muted">Thời hạn trong @newWindowDays ngày</div>
-                        </div>
 
-                        @if (!onlineNew.Any())
-                        {
-                            <div class="muted" style="margin-top:10px;">Hiện tại chưa có bài tập online.</div>
-                        }
-                        else
-                        {
-                            <div class="alist">
-                                @foreach (var a in onlineNew)
-                                {
-                                    var daysLeft = (a.Deadline - now).TotalDays;
-                                    var isOverdue = a.Deadline < now;
-                                    var isSoon = !isOverdue && daysLeft <= 2;
+        <div class="grid">
+            <section id="panel-online" class="tab-panel" role="tabpanel" aria-labelledby="tab-online">
+                <div class="cardx card-pad">
+                    <div class="hrow">
+                        <h3>Danh sách bài</h3>
+                        <div class="muted">Thời hạn trong @newWindowDays ngày</div>
+                    </div>
 
-                                    <div class="a">
-                                        <div class="a-left">
-                                            <div class="ico">✦</div>
-                                            <div class="a-text">
-                                                <div class="a-title" title="@a.Title">@a.Title</div>
+                    @if (Model.AvailableAssignments.Count() == 0)
+                    {
+                        <div class="muted" style="margin-top:10px;">Hiện tại chưa có bài tập online.</div>
+                    }
+                    else
+                    {
+                        <div class="alist">
+                            @foreach (var a in Model.AvailableAssignments)
+                            {
+                                var daysLeft = (a.Deadline - now).TotalDays;
+                                var isOverdue = a.Deadline < now;
+                                var isSoon = !isOverdue && daysLeft <= 2;
+
+                                <div class="a">
+                                    <div class="a-left">
+                                        <div class="ico">✦</div>
+                                        <div class="a-text">
+                                            <div class="a-title" title="@a.Title">@a.Title</div>
                                             <div class="a-desc">Course #@a.CourseId : @a.Description</div>
 
-                                                <div class="meta">
-                                                    @if (isOverdue)
-                                                    {
-                                                        <span class="tag danger">Đã hết hạn</span>
-                                                    }
-                                                    else if (isSoon)
-                                                    {
+                                            <div class="meta">
+                                                @if (isOverdue)
+                                                {
+                                                    <span class="tag danger">Đã hết hạn</span>
+                                                }
+                                                else if (isSoon)
+                                                {
 
-                                                        <span class="tag warn">Sắp quá hạn</span>
-                                                    }
-                                                    else
-                                                    {
+                                                    <span class="tag warn">Sắp quá hạn</span>
+                                                }
+                                                else
+                                                {
 
-                                                        <span class="tag ok">Làm bài</span>
-                                                    }
+                                                    <span class="tag ok">Làm bài</span>
+                                                }
 
-                                                    @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
-                                                    {
-                                                        <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                                    }
-                                                </div>
+                                                @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
+                                                {
+                                                    <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                                }
                                             </div>
-                                        </div>
-
-                                        <div class="a-right">
-                                            <div class="time">
-                                                Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
-                                                Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
-                                            </div>
-                                            <a class="btnx primary"
-                                               asp-area="Student"
-                                               asp-controller="Assignment"
-                                               asp-action="Details"
-                                               asp-route-id="@a.Id">
-                                                Làm bài
-                                            </a>
                                         </div>
                                     </div>
-                                }
-                            </div>
-                        }
-                    </div>
 
-                <!-- RIGHT sidebar (unchanged) -->
-                <div class="cardx widget">
-                    @* keep your existing sidebar markup exactly *@
-                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
-                        <span class="tag">Hôm nay</span>
-                    </div>
-
-                    <div class="stat">
-                        <span class="muted">Bài mới</span>
-                        <strong>@newlyUploaded.Count</strong>
-                    </div>
-
-                    <div class="stat">
-                        <span class="muted">Bài tập sẵn có</span>
-                        <strong>@available.Count</strong>
-                    </div>
-
-                    <div class="stat">
-                        <span class="muted">Bài tập quá hạn</span>
-                        <strong style="color:var(--danger);">@overdue.Count</strong>
-                    </div>
-
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses" asp-action="Index">Tới Khóa học</a>
-                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
-
-                    <div class="muted" style="margin-top:10px; line-height:1.5;">
-                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
-                    </div>
+                                    <div class="a-right">
+                                        <div class="time">
+                                            Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
+                                            Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                        <a class="btnx primary"
+                                           asp-area="Student"
+                                           asp-controller="Assignment"
+                                           asp-action="Details"
+                                           asp-route-id="@a.Id">
+                                            Làm bài
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
-            </div>
-        </section>
 
-        <section id="panel-offline" class="tab-panel" role="tabpanel" aria-labelledby="tab-offline">
-            <div class="grid">
-                <!-- Available (DOWNLOAD + SUBMIT) -->
+            </section>
+
+            <section id="panel-offline" class="tab-panel" role="tabpanel" aria-labelledby="tab-offline">
                 <div class="cardx card-pad">
                     <div class="hrow">
                         <h3>Bài tập tải về</h3>
                         <div class="muted">Hoàn thiện bài tập trước thời hạn</div>
                     </div>
 
-                    @if (!onlineAvailable.Any())
+                    @if (Model.AvailableAssignments.Count() == 0)
                     {
                         <div class="muted" style="margin-top:10px;">Không có bài tập tải về.</div>
                     }
                     else
                     {
                         <div class="alist">
-                            @foreach (var a in onlineAvailable)
+                            @foreach (var a in Model.AvailableAssignments)
                             {
                                 var isOverdue = a.Deadline < now;
                                 var daysLeft = (a.Deadline - now).TotalDays;
@@ -297,55 +263,23 @@
                     }
                 </div>
 
-                <!-- RIGHT sidebar (unchanged) -->
-                <div class="cardx widget">
-                    @* keep your existing sidebar markup exactly *@
-                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
-                        <span class="tag">Hôm nay</span>
-                    </div>
+            </section>
 
-                    <div class="stat">
-                        <span class="muted">Bài mới</span>
-                        <strong>@newlyUploaded.Count</strong>
-                    </div>
-
-                    <div class="stat">
-                        <span class="muted">Bài tập sẵn có</span>
-                        <strong>@available.Count</strong>
-                    </div>
-
-                    <div class="stat">
-                        <span class="muted">Bài tập quá hạn</span>
-                        <strong style="color:var(--danger);">@overdue.Count</strong>
-                    </div>
-
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses" asp-action="Index">Tới Khóa học</a>
-                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
-
-                    <div class="muted" style="margin-top:10px; line-height:1.5;">
-                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="panel-overdue" class="tab-panel" role="tabpanel" aria-labelledby="tab-overdue">
-            <div class="grid">
+            <section id="panel-overdue" class="tab-panel" role="tabpanel" aria-labelledby="tab-overdue">
                 <div class="cardx card-pad">
                     <div class="hrow">
                         <h3>Quá hạn</h3>
                         <div class="muted">Tài liệu tự học tự chấm</div>
                     </div>
 
-                    @if (!overdueAll.Any())
+                    @if (Model.OverdueAssignments.Any())
                     {
                         <div class="muted" style="margin-top:10px;">Không có bài quá hạn.</div>
                     }
                     else
                     {
                         <div class="alist">
-                            @foreach (var a in overdueAll)
+                            @foreach (var a in Model.OverdueAssignments)
                             {
                                 var hasFile = !string.IsNullOrWhiteSpace(a.FileUrl);
 
@@ -381,76 +315,45 @@
                         </div>
                     }
                 </div>
-                <!-- RIGHT sidebar (unchanged) -->
-                <div class="cardx widget">
-                    @* keep your existing sidebar markup exactly *@
-                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
-                        <span class="tag">Hôm nay</span>
-                    </div>
 
-                    <div class="stat">
-                        <span class="muted">Bài mới</span>
-                        <strong>@newlyUploaded.Count</strong>
-                    </div>
+            </section>
 
-                    <div class="stat">
-                        <span class="muted">Bài tập sẵn có</span>
-                        <strong>@available.Count</strong>
-                    </div>
-
-                    <div class="stat">
-                        <span class="muted">Bài tập quá hạn</span>
-                        <strong style="color:var(--danger);">@overdue.Count</strong>
-                    </div>
-
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses" asp-action="Index">Tới Khóa học</a>
-                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
-
-                    <div class="muted" style="margin-top:10px; line-height:1.5;">
-                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="panel-submissions" class="tab-panel" role="tabpanel" aria-labelledby="tab-submissions">
-            <div class="grid">
+            <section id="panel-submissions" class="tab-panel" role="tabpanel" aria-labelledby="tab-submissions">
                 <div class="cardx card-pad">
                     Hello
                 </div>
-                <!-- RIGHT sidebar (unchanged) -->
-                <div class="cardx widget">
-                    @* keep your existing sidebar markup exactly *@
-                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
-                        <span class="tag">Hôm nay</span>
-                    </div>
+            </section>
 
-                    <div class="stat">
-                        <span class="muted">Bài mới</span>
-                        <strong>@newlyUploaded.Count</strong>
-                    </div>
+            <div class="cardx widget">
+            @* keep your existing sidebar markup exactly *@
+                <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
+                    <span class="tag">Hôm nay</span>
+                </div>
 
-                    <div class="stat">
-                        <span class="muted">Bài tập sẵn có</span>
-                        <strong>@available.Count</strong>
-                    </div>
+                <div class="stat">
+                    <span class="muted">Bài mới</span>
+                    <strong>@Model.NewlyUploaded</strong>
+                </div>
 
-                    <div class="stat">
-                        <span class="muted">Bài tập quá hạn</span>
-                        <strong style="color:var(--danger);">@overdue.Count</strong>
-                    </div>
+                <div class="stat">
+                    <span class="muted">Bài tập sẵn có</span>
+                    <strong>@Model.AvailableAssignments.Count()</strong>
+                </div>
 
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses asp-action="Index">Tới Khóa học</a>
-                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+                <div class="stat">
+                    <span class="muted">Bài tập quá hạn</span>
+                    <strong style="color:var(--danger);">@Model.OverdueAssignments.Count()</strong>
+                </div>
 
-                    <div class="muted" style="margin-top:10px; line-height:1.5;">
-                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
-                    </div>
+                <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses asp-action="Index">Tới Khóa học</a>
+                <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+
+                <div class="muted" style="margin-top:10px; line-height:1.5;">
+                    Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
                 </div>
             </div>
-        </section>
+        </div>
 
     </div>
     <script>

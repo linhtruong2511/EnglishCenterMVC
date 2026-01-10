@@ -7,6 +7,9 @@ namespace EnglishCenterMVC.Services
     {
         Task<IEnumerable<Assignment>> GetAssignmentsAsync(int courseId);
         Task<IEnumerable<Assignment>> GetAssignmentsAsync();
+        Task<IEnumerable<Assignment>> GetOverdueAssignmentsAsync();
+        Task<int> GetNewlyUploadedAssignmentsAsync();
+        Task<int> GetAvailableAssignmentsAsync();
         Task<Assignment> GetAssignmentAsync(int id);
         Task<string> GetAssignmentContentAsync(int assignmentId); // Trả về đường dẫn file bài tập
 
