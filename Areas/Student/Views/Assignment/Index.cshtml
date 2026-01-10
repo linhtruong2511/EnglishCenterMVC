@@ -17,6 +17,10 @@
         .Where(a => a.Deadline < now)
         .OrderByDescending(a => a.Deadline)
         .ToList();
+    var onlineNew = newlyUploaded.Where(a => !string.IsNullOrWhiteSpace(a.FileUrl)).ToList();
+    var onlineAvailable = available.Where(a => !string.IsNullOrWhiteSpace(a.FileUrl)).ToList();
+    string FriendlyType(string? t) => string.IsNullOrWhiteSpace(t) ? "Submission" : t.Trim();
+    var overdueAll = overdue; // already computed
 }
 @model IEnumerable<EnglishCenterMVC.Models.Assignment>
 
@@ -42,49 +46,178 @@
         </div>
 
         <!-- Tabs (future-proof) -->
-        <div class="tabs">
-            <button class="tab active" type="button">Bài tập</button>
-            <button class="tab" type="button">Quá hạn</button>
-            <button class="tab" type="button" disabled style="opacity:.45; cursor:not-allowed;">Submissions (soon)</button>
+        <div class="tabs" role="tablist" aria-label="Assignments tabs">
+            <button class="tab active" type="button"
+                    role="tab" aria-selected="true"
+                    aria-controls="panel-online" id="tab-online"
+                    data-target="panel-online">
+                Bài tập online
+            </button>
+
+            <button class="tab active" type="button"
+                    role="tab" aria-selected="false"
+                    aria-controls="panel-offline" id="tab-offline"
+                    data-target="panel-offline">
+                Bài tập tải về
+            </button>
+
+            <button class="tab" type="button"
+                    role="tab" aria-selected="false"
+                    aria-controls="panel-overdue" id="tab-overdue"
+                    data-target="panel-overdue">
+                Quá hạn
+            </button>
+
+            <button class="tab" type="button" disabled
+                    role="tab" aria-selected="false"
+                    aria-controls="panel-submissions" id="tab-submissions"
+                    style="opacity:.45; cursor:not-allowed;">
+                Submissions (soon)
+            </button>
         </div>
 
-        <div class="grid">
-            <!-- LEFT: Lists -->
-            <div>
+        <section id="panel-online" class="tab-panel" role="tabpanel" aria-labelledby="tab-online">
+            <div class="grid">
+                <!-- LEFT -->
+                    <!-- Newly uploaded (ONLINE only) -->
+                    <div class="cardx card-pad">
+                        <div class="hrow">
+                            <h3>Các bài tập mới</h3>
+                            <div class="muted">Thời hạn trong @newWindowDays ngày</div>
+                        </div>
 
-                <!-- Newly uploaded -->
-                <div class="cardx card-pad">
-                    <div class="hrow">
-                        <h3>Các bài tập mới</h3>
-                        <div class="muted">Thời hạn trong @newWindowDays ngày</div>
+                        @if (!onlineNew.Any())
+                        {
+                            <div class="muted" style="margin-top:10px;">Hiện tại chưa có bài tập online.</div>
+                        }
+                        else
+                        {
+                            <div class="alist">
+                                @foreach (var a in onlineNew)
+                                {
+                                    var daysLeft = (a.Deadline - now).TotalDays;
+                                    var isOverdue = a.Deadline < now;
+                                    var isSoon = !isOverdue && daysLeft <= 2;
+
+                                    <div class="a">
+                                        <div class="a-left">
+                                            <div class="ico">✦</div>
+                                            <div class="a-text">
+                                                <div class="a-title" title="@a.Title">@a.Title</div>
+                                            <div class="a-desc">Course #@a.CourseId : @a.Description</div>
+
+                                                <div class="meta">
+                                                    @if (isOverdue)
+                                                    {
+                                                        <span class="tag danger">Đã hết hạn</span>
+                                                    }
+                                                    else if (isSoon)
+                                                    {
+
+                                                        <span class="tag warn">Sắp quá hạn</span>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <span class="tag ok">Làm bài</span>
+                                                    }
+
+                                                    @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
+                                                    {
+                                                        <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="a-right">
+                                            <div class="time">
+                                                Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
+                                                Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
+                                            </div>
+                                            <a class="btnx primary"
+                                               asp-area="Student"
+                                               asp-controller="Assignment"
+                                               asp-action="Details"
+                                               asp-route-id="@a.Id">
+                                                Làm bài
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
 
-                    @if (!newlyUploaded.Any())
+                <!-- RIGHT sidebar (unchanged) -->
+                <div class="cardx widget">
+                    @* keep your existing sidebar markup exactly *@
+                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
+                        <span class="tag">Hôm nay</span>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài mới</span>
+                        <strong>@newlyUploaded.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập sẵn có</span>
+                        <strong>@available.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập quá hạn</span>
+                        <strong style="color:var(--danger);">@overdue.Count</strong>
+                    </div>
+
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+
+                    <div class="muted" style="margin-top:10px; line-height:1.5;">
+                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="panel-offline" class="tab-panel" role="tabpanel" aria-labelledby="tab-offline">
+            <div class="grid">
+                <!-- Available (DOWNLOAD + SUBMIT) -->
+                <div class="cardx card-pad">
+                    <div class="hrow">
+                        <h3>Bài tập tải về</h3>
+                        <div class="muted">Oldest → Newest (CreatedAt)</div>
+                    </div>
+
+                    @if (!onlineAvailable.Any())
                     {
-                        <div class="muted" style="margin-top:10px;">Hiện tại chưa có bài tập.</div>
+                        <div class="muted" style="margin-top:10px;">Không có bài tập tải về.</div>
                     }
                     else
                     {
                         <div class="alist">
-                            @foreach (var a in newlyUploaded)
+                            @foreach (var a in onlineAvailable)
                             {
-                                var daysLeft = (a.Deadline - now).TotalDays;
                                 var isOverdue = a.Deadline < now;
+                                var daysLeft = (a.Deadline - now).TotalDays;
                                 var isSoon = !isOverdue && daysLeft <= 2;
+
+                                var hasFile = !string.IsNullOrWhiteSpace(a.FileUrl);
 
                                 <div class="a">
                                     <div class="a-left">
-                                        <div class="ico">✦</div>
+                                        <div class="ico">⬇</div>
                                         <div class="a-text">
                                             <div class="a-title" title="@a.Title">@a.Title</div>
-                                            <div class="a-desc">@a.Description</div>
+                                            <div class="a-desc">Course #@a.CourseId : @a.Description</div>
 
                                             <div class="meta">
-                                                <span class="tag">Khóa học #@a.CourseId</span>
 
                                                 @if (isOverdue)
                                                 {
-                                                    <span class="tag danger">Đã hết hạn</span>
+                                                    <span class="tag danger">Đã quá hạn</span>
                                                 }
                                                 else if (isSoon)
                                                 {
@@ -92,24 +225,148 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="tag ok">Làm bài</span>
+                                                    <span class="tag ok">Còn hạn</span>
                                                 }
 
-                                                @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
+                                                @if (a.AllowResubmit)
                                                 {
-                                                    <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                                    <span class="tag ok">Cho nộp lại</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="tag gray">Không nộp lại</span>
                                                 }
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="a-right">
-                                        <a class="btnx primary"
-                                           asp-area="Student"
-                                           asp-controller="Assignment"
-                                           asp-action="Details"
-                                           asp-route-id="@a.Id">
-                                            Làm bài
+                                        <div class="time">
+                                            Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
+                                            Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                        <!-- Download -->
+                                        <a class="btnx"
+                                           href="@(hasFile? Url.Content(a.FileUrl) : "javascript:void(0)")"
+                                           target="_blank"
+                                           style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                                            Download
+                                        </a>
+
+                                        <!-- Submit -->
+                                        <form asp-area="Student"
+                                              asp-controller="Assignment"
+                                              asp-action="SubmitFile"
+                                              method="post"
+                                              enctype="multipart/form-data"
+                                              style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; width: 100%;">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden" name="assignmentId" value="@a.Id" />
+
+                                            <input type="file"
+                                                   name="submissionFile"
+                                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg"
+                                                   style="max-width: 220px;"
+                                                   @(isOverdue ? "disabled" : "") />
+
+                                            <button class="btnx primary"
+                                                    type="submit"
+                                                    style="@(isOverdue ? "opacity:.45; pointer-events:none;" : "")">
+                                                @(a.AllowResubmit ? "Nộp / Nộp lại" : "Nộp bài")
+                                            </button>
+
+                                            @* If you want strict “no resubmit”, backend should block if already submitted *@
+                                        </form>
+
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- RIGHT sidebar (unchanged) -->
+                <div class="cardx widget">
+                    @* keep your existing sidebar markup exactly *@
+                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
+                        <span class="tag">Hôm nay</span>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài mới</span>
+                        <strong>@newlyUploaded.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập sẵn có</span>
+                        <strong>@available.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập quá hạn</span>
+                        <strong style="color:var(--danger);">@overdue.Count</strong>
+                    </div>
+
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+
+                    <div class="muted" style="margin-top:10px; line-height:1.5;">
+                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="panel-overdue" class="tab-panel" role="tabpanel" aria-labelledby="tab-overdue" hidden>
+            <div class="grid">
+                <div class="cardx card-pad">
+                    <div class="hrow">
+                        <h3>Quá hạn</h3>
+                        <div class="muted">Past deadline (download only)</div>
+                    </div>
+
+                    @if (!overdueAll.Any())
+                    {
+                        <div class="muted" style="margin-top:10px;">Không có bài quá hạn.</div>
+                    }
+                    else
+                    {
+                        <div class="alist">
+                            @foreach (var a in overdueAll)
+                            {
+                                var hasFile = !string.IsNullOrWhiteSpace(a.FileUrl);
+
+                                <div class="a">
+                                    <div class="a-left">
+                                        <div class="ico">!</div>
+                                        <div class="a-text">
+                                            <div class="a-title" title="@a.Title">@a.Title</div>
+                                            <div class="a-desc">@a.Description</div>
+
+                                            <div class="meta">
+                                                <span class="tag">@FriendlyType(a.TypeSubmit)</span>
+                                                <span class="tag gray">Course #@a.CourseId</span>
+                                                <span class="tag danger">Overdue</span>
+
+                                                @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
+                                                {
+                                                    <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                                }
+
+                                                <span class="tag gray">Study only</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="a-right">
+                                        <a class="btnx"
+                                           href="@(hasFile? Url.Content(a.FileUrl) : "javascript:void(0)")"
+                                           target="_blank"
+                                           style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                                            Download
                                         </a>
 
                                         <div class="time">
@@ -122,37 +379,68 @@
                         </div>
                     }
                 </div>
+                <!-- RIGHT sidebar (unchanged) -->
+                <div class="cardx widget">
+                    @* keep your existing sidebar markup exactly *@
+                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
+                        <span class="tag">Hôm nay</span>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài mới</span>
+                        <strong>@newlyUploaded.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập sẵn có</span>
+                        <strong>@available.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập quá hạn</span>
+                        <strong style="color:var(--danger);">@overdue.Count</strong>
+                    </div>
+
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+
+                    <div class="muted" style="margin-top:10px; line-height:1.5;">
+                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <!-- RIGHT: Sidebar widgets -->
-            <div class="cardx widget">
-                <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                    <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
-                    <span class="tag">Hôm nay</span>
-                </div>
-
-                <div class="stat">
-                    <span class="muted">Bài mới</span>
-                    <strong>@newlyUploaded.Count</strong>
-                </div>
-
-                <div class="stat">
-                    <span class="muted">Bài tập sẵn có</span>
-                    <strong>@available.Count</strong>
-                </div>
-
-                <div class="stat">
-                    <span class="muted">Bài tập quá hạn</span>
-                    <strong style="color:var(--danger);">@overdue.Count</strong>
-                </div>
-
-                <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
-                <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
-
-                <div class="muted" style="margin-top:10px; line-height:1.5;">
-                    Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
-                </div>
+        <section id="panel-submissions" class="tab-panel" role="tabpanel" aria-labelledby="tab-submissions" hidden>
+            <div class="cardx card-pad">
+                <div class="muted">Coming soon.</div>
             </div>
-        </div>
+        </section>
+
     </div>
+    <script>
+        (function () {
+          const tabs = Array.from(document.querySelectorAll(".tabs .tab[role='tab']:not([disabled])"));
+          const panels = Array.from(document.querySelectorAll(".tab-panel[role='tabpanel']"));
+
+          function activate(tab) {
+            tabs.forEach(t => {
+              const isActive = t === tab;
+              t.classList.toggle("active", isActive);
+              t.setAttribute("aria-selected", isActive ? "true" : "false");
+            });
+
+            const targetId = tab.getAttribute("data-target");
+            panels.forEach(p => p.hidden = (p.id !== targetId));
+          }
+
+          tabs.forEach(tab => tab.addEventListener("click", () => activate(tab)));
+
+          // default
+          const first = tabs.find(t => t.classList.contains("active")) || tabs[0];
+          if (first) activate(first);
+        })();
+    </script>
+
 </body>

@@ -8,12 +8,12 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
     public class AssignmentController : Controller
     {
         IAssignmentService assignmentService;
-        ICourseService courseService;
+        ISubmissionService submissionService;
 
-        public AssignmentController(IAssignmentService assignmentService, ICourseService courseService)
+        public AssignmentController(IAssignmentService assignmentService, ISubmissionService submissionService)
         {
             this.assignmentService = assignmentService;
-            this.courseService = courseService;
+            this.submissionService = submissionService;
         }
         public async Task<IActionResult> Index(int courseId)
         {
