@@ -15,19 +15,18 @@
         </div>
     </div>
 
-    <div class="dash-grid">
+    <div class="dash-grid py-1">
 
         <!-- Column 1: Course Progress + Daily Goal + Words Learned -->
         <div class="cardx">
 
-            <div class="d-flex" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+            <div class="d-flex mb-1" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
                 <div>
                     <h5>Quá trình học tập</h5>
-                    <div class="muted">Checkpoint, level progress, and lesson momentum.</div>
                 </div>
-                <span class="tag">Giáo trình: English A2</span>
+                <span class="tag">Trình độ: English A2</span>
             </div>
-
+            <hr />
             <div class="progress-list">
                 <div class="progress-row">
                     <div style="min-width:150px; font-weight:700;">Mốc</div>
@@ -45,7 +44,7 @@
                     <div class="muted" style="min-width:60px; text-align:right;">3/10</div>
                 </div>
             </div>
-
+            <hr />
             <div class="split">
 
                 <!-- Daily Goal -->
@@ -62,19 +61,20 @@
                             <span class="muted">Chuỗi</span>
                             <strong>7 ngày</strong>
                         </div>
+                        <div class="muted fw-semibold" style="margin-top:8px;">Hãy tiếp tục hoàn thiện bài tập và duy trì chuỗi!</div>
 
-                        <button class="btnx primary" style="width:100%; margin-top:6px;">Đạt mục tiêu hôm nay</button>
+                        <a asp-controller="Assignment" asp-action="Index" class="btnx primary" style="width:100%; margin-top:6px;">Đạt mục tiêu hôm nay</a>
                     </div>
                 </div>
 
                 <!-- Words Learned Chart (placeholder) -->
                 <div class="cardx" style="border-radius:12px; padding:14px; box-shadow:none;">
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h5 style="margin:0;">Từ vựng học được</h5>
-                        <span class="tag">This week</span>
+                        <h5 style="margin:0;">Vốn từ vựng</h5>
+                        <span class="tag">Tuần này</span>
                     </div>
                     <div class="chart-box" style="margin-top:10px;">
-                        <span>[ Chart placeholder: plug Chart.js later ]</span>
+                        <span class="fw-semibold fst-italic" style="font-size:xx-large">[ Limerance ]</span>
                     </div>
                     <div class="muted" style="margin-top:8px;">Xu hướng: ổn định. Cố gắng duy trì trước các câu khó.</div>
                 </div>

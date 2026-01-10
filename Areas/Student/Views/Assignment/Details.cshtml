@@ -1,0 +1,495 @@
+﻿@model EnglishCenterMVC.Models.Assignment
+@{
+    ViewData["Title"] = Model?.Title ?? "Assignment";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+    var hasFile = !string.IsNullOrWhiteSpace(Model?.FileUrl);
+    // Fast config: change these per assignment (or your colleague can pass them later)
+    var questionCount = 40;     // TOEIC reading often 100 total; per assignment maybe 20/40
+    var choiceCount = 4;        // A-D
+}
+
+<style>
+    :root {
+        --bg: #f6f7fb;
+        --card: #fff;
+        --border: rgba(0,0,0,.10);
+        --muted: rgba(0,0,0,.62);
+        --ink: rgba(0,0,0,.88);
+        --brand: #3b82f6;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+    }
+
+    body {
+        background: var(--bg);
+    }
+
+    .wrap {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 18px;
+    }
+
+    .hero {
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: linear-gradient(135deg, #0a2346, #105aa0);
+        color: #fff;
+        box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        margin-bottom: 14px;
+    }
+
+    .hero-inner {
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: flex-end;
+    }
+
+    .hero h1 {
+        margin: 0;
+        font-weight: 900;
+        letter-spacing: -.6px;
+        font-size: 1.9rem;
+        line-height: 1.1;
+    }
+
+    .hero .sub {
+        margin-top: 8px;
+        opacity: .9;
+        max-width: 860px;
+    }
+
+    .pillrow {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .pill {
+        background: rgba(255,255,255,.14);
+        border: 1px solid rgba(255,255,255,.18);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 850;
+        font-size: .82rem;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 14px;
+        align-items: start;
+    }
+
+    {
+        .grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    .cardx {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 6px 22px rgba(0,0,0,.04);
+        overflow: hidden;
+    }
+
+    /* PDF frame */
+    .pdf-top {
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .pdf-title {
+        font-weight: 900;
+        color: var(--ink);
+    }
+
+    .btnx {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 12px;
+        padding: 9px 12px;
+        font-weight: 900;
+        text-decoration: none;
+        color: rgba(0,0,0,.82);
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .btnx.primary {
+            background: var(--brand);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btnx.disabled {
+            opacity: .45;
+            pointer-events: none;
+        }
+
+    .pdf-frame {
+        height: calc(100vh - 260px);
+        min-height: 520px;
+        width: 100%;
+        border: 0;
+        display: block;
+        background: #000;
+    }
+
+    /* Answer sheet */
+    .sheet-top {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .label {
+        font-weight: 900;
+        color: var(--ink);
+    }
+
+    select {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 9px 10px;
+        background: #fff;
+        font-weight: 800;
+        min-width: 120px;
+    }
+
+    .sheet-body {
+        padding: 14px;
+    }
+
+    .muted {
+        color: var(--muted);
+    }
+
+    .qline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 10px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin-bottom: 10px;
+    }
+
+    .qnum {
+        font-weight: 950;
+        letter-spacing: -.2px;
+    }
+
+    .choices {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .chip {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 7px 10px;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 900;
+        min-width: 44px;
+        text-align: center;
+        user-select: none;
+    }
+
+        .chip.active {
+            border-color: rgba(59,130,246,.45);
+            background: rgba(59,130,246,.10);
+            color: rgba(0,0,0,.88);
+        }
+
+    .palette {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 8px;
+    }
+
+    .qbtn {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 10px;
+        padding: 9px 0;
+        font-weight: 900;
+        cursor: pointer;
+        text-align: center;
+        user-select: none;
+    }
+
+        .qbtn.answered {
+            border-color: rgba(34,197,94,.35);
+            background: rgba(34,197,94,.10);
+        }
+
+        .qbtn.current {
+            border-color: rgba(59,130,246,.45);
+            background: rgba(59,130,246,.10);
+        }
+
+    .stat {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 0;
+        border-top: 1px solid var(--border);
+    }
+
+        .stat:first-of-type {
+            border-top: none;
+        }
+
+    .sheet-footer {
+        padding: 12px 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="wrap">
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <h1>@Model.Title</h1>
+                <div class="sub">@Model.Description</div>
+                <div class="pillrow">
+                    <span class="pill">Course #@Model.CourseId</span>
+                    <span class="pill">Deadline: @Model.Deadline.ToString("dd/MM/yyyy HH:mm")</span>
+                    <span class="pill">Resubmit: @(Model.AllowResubmit ? "Yes" : "No")</span>
+                </div>
+            </div>
+            <div>
+                <a class="pill" asp-area="Student" asp-controller="Assignment" asp-action="Index">Back</a>
+            </div>
+        </div>
+    </div>
+
+    @if (!hasFile)
+    {
+        <div class="cardx">
+            <div class="sheet-body">
+                <strong>No file attached.</strong>
+                <div class="muted" style="margin-top:6px;">This assignment doesn’t have a PDF yet.</div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="grid">
+
+            <!-- LEFT: PDF viewer -->
+            <div class="cardx">
+                <div class="pdf-top">
+                    <div class="pdf-title">Reading Material (PDF)</div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <a class="btnx" href="@Url.Content(Model.FileUrl)" target="_blank">Open in new tab</a>
+                        <button class="btnx" type="button" id="btnFullscreen">Fullscreen</button>
+                    </div>
+                </div>
+
+                @* Use iframe. If some browsers block PDF in iframe, fallback is "open new tab". *@
+                <iframe class="pdf-frame" id="pdfFrame" src="@Url.Content(Model.FileUrl)#toolbar=1&navpanes=0&view=FitH"></iframe>
+            </div>
+
+            <!-- RIGHT: Answer sheet -->
+            <div class="cardx">
+                <div class="sheet-top">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="label">Question</span>
+                        <select id="qSelect"></select>
+                        <span class="muted" id="qCounter"></span>
+                    </div>
+
+                    <button class="btnx primary" type="button" id="btnSubmit">Submit</button>
+                </div>
+
+                <div class="sheet-body">
+                    <div class="muted">Read the PDF on the left, then choose your answer here. Jump around freely.</div>
+
+                    <div style="margin-top:12px;" id="answerRow"></div>
+
+                    <div style="margin-top:12px;">
+                        <div class="stat"><span class="muted">Answered</span><strong id="statAnswered">0</strong></div>
+                        <div class="stat"><span class="muted">Remaining</span><strong id="statRemain">0</strong></div>
+                    </div>
+
+                    <div class="palette" id="palette"></div>
+                </div>
+
+                <div class="sheet-footer">
+                    <button class="btnx" type="button" id="btnPrev">← Prev</button>
+                    <div class="muted" id="saveHint">Auto-saves locally.</div>
+                    <button class="btnx" type="button" id="btnNext">Next →</button>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            const storageKey = "assign_pdf_answers_" + @Model.Id;
+
+            const questionCount = @questionCount; // baseline config
+            const choiceCount = @choiceCount;     // 4 => A-D
+
+            const qSelect = document.getElementById("qSelect");
+            const qCounter = document.getElementById("qCounter");
+            const answerRow = document.getElementById("answerRow");
+            const palette = document.getElementById("palette");
+
+            const btnPrev = document.getElementById("btnPrev");
+            const btnNext = document.getElementById("btnNext");
+            const btnSubmit = document.getElementById("btnSubmit");
+            const btnFullscreen = document.getElementById("btnFullscreen");
+            const pdfFrame = document.getElementById("pdfFrame");
+
+            const statAnswered = document.getElementById("statAnswered");
+            const statRemain = document.getElementById("statRemain");
+
+            let answers = {};     // { [qNumber]: "A"|"B"|"C"|"D" }
+            let currentQ = 1;     // 1..questionCount
+
+            function toLetter(i){ return String.fromCharCode(65 + i); } // 0->A
+
+            function loadAnswers(){
+                try{
+                    const raw = localStorage.getItem(storageKey);
+                    answers = raw ? (JSON.parse(raw) || {}) : {};
+                }catch{ answers = {}; }
+            }
+            function saveAnswers(){
+                try{ localStorage.setItem(storageKey, JSON.stringify(answers)); }catch{}
+            }
+
+            function renderSelect(){
+                qSelect.innerHTML = "";
+                for(let q=1; q<=questionCount; q++){
+                    const opt = document.createElement("option");
+                    opt.value = q;
+                    opt.textContent = "Q" + q;
+                    qSelect.appendChild(opt);
+                }
+            }
+
+            function renderPalette(){
+                palette.innerHTML = "";
+                for(let q=1; q<=questionCount; q++){
+                    const b = document.createElement("div");
+                    b.className = "qbtn";
+                    b.textContent = q;
+                    if(answers[q] !== undefined) b.classList.add("answered");
+                    if(q === currentQ) b.classList.add("current");
+                    b.addEventListener("click", ()=>{ currentQ = q; renderQuestion(); });
+                    palette.appendChild(b);
+                }
+            }
+
+            function renderStats(){
+                const answeredCount = Object.keys(answers).length;
+                statAnswered.textContent = answeredCount;
+                statRemain.textContent = (questionCount - answeredCount);
+            }
+
+            function renderQuestion(){
+                qSelect.value = String(currentQ);
+                qCounter.textContent = `${currentQ} / ${questionCount}`;
+
+                answerRow.innerHTML = "";
+
+                const wrap = document.createElement("div");
+                wrap.className = "qline";
+
+                const left = document.createElement("div");
+                left.innerHTML = `<div class="qnum">Question ${currentQ}</div><div class="muted">Pick A–${toLetter(choiceCount-1)}</div>`;
+
+                const right = document.createElement("div");
+                right.className = "choices";
+
+                for(let i=0; i<choiceCount; i++){
+                    const letter = toLetter(i);
+                    const chip = document.createElement("div");
+                    chip.className = "chip";
+                    chip.textContent = letter;
+                    if(answers[currentQ] === letter) chip.classList.add("active");
+
+                    chip.addEventListener("click", ()=>{
+                        answers[currentQ] = letter;
+                        saveAnswers();
+                        renderQuestion();
+                        renderPalette();
+                        renderStats();
+                    });
+
+                    right.appendChild(chip);
+                }
+
+                wrap.appendChild(left);
+                wrap.appendChild(right);
+                answerRow.appendChild(wrap);
+
+                btnPrev.classList.toggle("disabled", currentQ === 1);
+                btnNext.classList.toggle("disabled", currentQ === questionCount);
+
+                renderPalette();
+                renderStats();
+            }
+
+            btnPrev.addEventListener("click", ()=>{
+                if(currentQ <= 1) return;
+                currentQ--;
+                renderQuestion();
+            });
+            btnNext.addEventListener("click", ()=>{
+                if(currentQ >= questionCount) return;
+                currentQ++;
+                renderQuestion();
+            });
+            qSelect.addEventListener("change", ()=>{
+                currentQ = parseInt(qSelect.value || "1", 10);
+                renderQuestion();
+            });
+
+            btnSubmit.addEventListener("click", ()=>{
+                const answeredCount = Object.keys(answers).length;
+                alert(`Submitted (baseline)\nAnswered: ${answeredCount}/${questionCount}`);
+                // Later: POST answers to backend
+            });
+
+            btnFullscreen.addEventListener("click", ()=>{
+                // best-effort fullscreen (browser policy may block if not user gesture—this is a click so OK)
+                if (pdfFrame.requestFullscreen) pdfFrame.requestFullscreen();
+            });
+
+            // init
+            loadAnswers();
+            renderSelect();
+            renderQuestion();
+        </script>
+    }
+</div>

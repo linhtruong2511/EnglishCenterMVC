@@ -50,7 +50,6 @@
     <link rel="stylesheet" href="~/sneat/assets/vendor/libs/apex-charts/apex-charts.css" />
 
     <link rel="stylesheet" href="~/css/studentDashboard.css" />
-    <link rel="stylesheet" href="~/css/lessons.css" />
 
     <!-- Page CSS -->
     <!-- Helpers -->
@@ -113,7 +112,7 @@
                                 </g>
                             </svg>
                         </span>
-                        <span class="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
+                        <span class="app-brand-text demo menu-text fw-bolder ms-2">LinguistHub</span>
                     </a>
 
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -131,8 +130,12 @@
                             <div data-i18n="Analytics">Dashboard</div>
                         </a>
                         <a asp-controller="Courses" asp-action="Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <i class="menu-icon tf-icons bx bx-play-circle"></i>
                             <div data-i18n="Analytics">My courses</div>
+                        </a>
+                        <a asp-controller="Assignment" asp-action="Index" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-book-content"></i>
+                            <div data-i18n="Analytics">Assignments</div>
                         </a>
                     </li>
                 </ul>
