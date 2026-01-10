@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EnglishCenterMVC.Data;
-using EnglishCenterMVC.Models;
 using EnglishCenterMVC.Services;
 using EnglishCenterMVC.Areas.Admin.Models;
 
@@ -94,7 +88,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                 Title = assignment.Title,
                 Description = assignment.Description,
                 FileUrl = assignment.FileUrl,
-                Type = assignment.TypeSubmit,
+                SubmitType = assignment.TypeSubmit,
                 Deadline = assignment.Deadline,
                 CourseId = assignment.CourseId,
             });

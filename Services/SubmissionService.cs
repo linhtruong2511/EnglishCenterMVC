@@ -34,8 +34,6 @@ namespace EnglishCenterMVC.Services
             if (DateTime.Now > assignment.Deadline)
                 throw new Exception("Đã quá hạn nộp bài");
 
-            ValidateFileType(file, assignment.TypeSubmit);
-
             var existingSubmission = await context.Submissions
                 .Where(s => s.UserId == userId && s.AssignmentId == assignmentId)
                 .FirstAsync();
@@ -129,23 +127,6 @@ namespace EnglishCenterMVC.Services
                 .Include(x => x.Assignment)
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
-        }
-
-        private void ValidateFileType(IFormFile file, string assignmentType)
-        {
-            var ext = Path.GetExtension(file.FileName).ToLower();
-
-            if (assignmentType == "image" &&
-                !new[] { ".jpg", ".jpeg", ".png", ".webp" }.Contains(ext))
-                throw new Exception("Sai định dạng ảnh");
-
-            if (assignmentType == "video" &&
-                !new[] { ".mp4", ".mov", ".avi" }.Contains(ext))
-                throw new Exception("Sai định dạng video");
-
-            if (assignmentType == "audio" &&
-                !new[] { ".mp3", ".wav" }.Contains(ext))
-                throw new Exception("Sai định dạng audio");
         }
     }
 }

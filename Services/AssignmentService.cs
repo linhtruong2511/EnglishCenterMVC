@@ -34,7 +34,7 @@ namespace EnglishCenterMVC.Services
             {
                 Title = assignment.Title,
                 Description = assignment.Description,
-                TypeSubmit = assignment.Type,
+                TypeSubmit = assignment.SubmitType,
                 FileUrl = fileUrl,
                 Deadline = assignment.Deadline,
                 CreateAt = DateTime.Now,
@@ -113,7 +113,7 @@ namespace EnglishCenterMVC.Services
 
             entity.Title = assignment.Title;
             entity.Description = assignment.Description;
-            entity.TypeSubmit = assignment.Type;
+            entity.TypeSubmit = assignment.SubmitType;
             entity.Deadline = assignment.Deadline;
             entity.UpdateAt = DateTime.Now;
 

@@ -1,11 +1,17 @@
 ﻿namespace EnglishCenterMVC.Models
 {
+    public enum SubmitType
+    {
+        ONLINE,
+        FILE
+    }
+
     public class Assignment
     {
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string TypeSubmit { get; set; }
+        public SubmitType TypeSubmit { get; set; } = SubmitType.FILE;
         public string FileUrl { get; set; }
 
         public int CourseId{ get; set; }
