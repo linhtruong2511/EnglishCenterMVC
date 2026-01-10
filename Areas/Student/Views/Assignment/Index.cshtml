@@ -68,11 +68,11 @@
                 Quá hạn
             </button>
 
-            <button class="tab" type="button" disabled
+            <button class="tab" type="button"
                     role="tab" aria-selected="false"
                     aria-controls="panel-submissions" id="tab-submissions"
-                    style="opacity:.45; cursor:not-allowed;">
-                Submissions (soon)
+                    data-target="panel-submissions">
+                Bài nộp
             </button>
         </div>
 
@@ -82,7 +82,7 @@
                     <!-- Newly uploaded (ONLINE only) -->
                     <div class="cardx card-pad">
                         <div class="hrow">
-                            <h3>Các bài tập mới</h3>
+                            <h3>Danh sách bài</h3>
                             <div class="muted">Thời hạn trong @newWindowDays ngày</div>
                         </div>
 
@@ -172,7 +172,7 @@
                         <strong style="color:var(--danger);">@overdue.Count</strong>
                     </div>
 
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses" asp-action="Index">Tới Khóa học</a>
                     <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
 
                     <div class="muted" style="margin-top:10px; line-height:1.5;">
@@ -188,7 +188,7 @@
                 <div class="cardx card-pad">
                     <div class="hrow">
                         <h3>Bài tập tải về</h3>
-                        <div class="muted">Oldest → Newest (CreatedAt)</div>
+                        <div class="muted">Hoàn thiện bài tập trước thời hạn</div>
                     </div>
 
                     @if (!onlineAvailable.Any())
@@ -252,34 +252,44 @@
                                            style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
                                             Download
                                         </a>
-
-                                        <!-- Submit -->
+                                        <!-- Submit (compact) -->
                                         <form asp-area="Student"
                                               asp-controller="Assignment"
                                               asp-action="SubmitFile"
                                               method="post"
                                               enctype="multipart/form-data"
-                                              style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; width: 100%;">
+                                              class="subrow">
 
                                             @Html.AntiForgeryToken()
-
                                             <input type="hidden" name="assignmentId" value="@a.Id" />
 
-                                            <input type="file"
-                                                   name="submissionFile"
-                                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg"
-                                                   style="max-width: 220px;"
-                                                   @(isOverdue ? "disabled" : "") />
+                                            <!-- Dropzone -->
+                                            <div class="dz dz-compact @(isOverdue ? "dz-disabled" : "")" data-dz>
+                                                <input type="file"
+                                                       id="file_@a.Id"
+                                                       name="submissionFile"
+                                                       class="dz-input"
+                                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg"
+                                                       @(isOverdue ? "disabled" : "") />
 
+                                                <label class="dz-box" for="file_@a.Id">
+                                                    <span class="dz-ico">📎</span>
+                                                    <span class="dz-title">Gửi bài làm</span>
+                                                    <span class="dz-meta" data-dz-meta>Chưa chọn file</span>
+                                                </label>
+
+                                                <button class="dz-clear" type="button" data-dz-clear title="Clear" style="display:none;">✕</button>
+                                            </div>
+
+                                            <!-- Submit -->
                                             <button class="btnx primary"
                                                     type="submit"
-                                                    style="@(isOverdue ? "opacity:.45; pointer-events:none;" : "")">
-                                                @(a.AllowResubmit ? "Nộp / Nộp lại" : "Nộp bài")
+                                                    id="btnSubmit_@a.Id"
+                                                    disabled
+                                                    style="opacity:.55; cursor:not-allowed; @(isOverdue ? "pointer-events:none;" : "")">
+                                                @(a.AllowResubmit ? "Nộp lại" : "Nộp bài")
                                             </button>
-
-                                            @* If you want strict “no resubmit”, backend should block if already submitted *@
                                         </form>
-
                                     </div>
                                 </div>
                             }
@@ -310,7 +320,7 @@
                         <strong style="color:var(--danger);">@overdue.Count</strong>
                     </div>
 
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses" asp-action="Index">Tới Khóa học</a>
                     <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
 
                     <div class="muted" style="margin-top:10px; line-height:1.5;">
@@ -320,12 +330,12 @@
             </div>
         </section>
 
-        <section id="panel-overdue" class="tab-panel" role="tabpanel" aria-labelledby="tab-overdue" hidden>
+        <section id="panel-overdue" class="tab-panel" role="tabpanel" aria-labelledby="tab-overdue">
             <div class="grid">
                 <div class="cardx card-pad">
                     <div class="hrow">
                         <h3>Quá hạn</h3>
-                        <div class="muted">Past deadline (download only)</div>
+                        <div class="muted">Tài liệu tự học tự chấm</div>
                     </div>
 
                     @if (!overdueAll.Any())
@@ -344,19 +354,12 @@
                                         <div class="ico">!</div>
                                         <div class="a-text">
                                             <div class="a-title" title="@a.Title">@a.Title</div>
-                                            <div class="a-desc">@a.Description</div>
+                                            <div class="a-desc">Course #@a.CourseId : @a.Description</div>
 
                                             <div class="meta">
                                                 <span class="tag">@FriendlyType(a.TypeSubmit)</span>
-                                                <span class="tag gray">Course #@a.CourseId</span>
-                                                <span class="tag danger">Overdue</span>
-
-                                                @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
-                                                {
-                                                    <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                                }
-
-                                                <span class="tag gray">Study only</span>
+                                                <span class="tag danger">Quá hạn</span>
+                                                <span class="tag gray">Uploaded: @a.CreateAt.ToString("dd/MM/yyyy")</span>
                                             </div>
                                         </div>
                                     </div>
@@ -370,8 +373,7 @@
                                         </a>
 
                                         <div class="time">
-                                            Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
-                                            Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
+                                            Expired: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
                                         </div>
                                     </div>
                                 </div>
@@ -402,7 +404,7 @@
                         <strong style="color:var(--danger);">@overdue.Count</strong>
                     </div>
 
-                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Course" asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses" asp-action="Index">Tới Khóa học</a>
                     <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
 
                     <div class="muted" style="margin-top:10px; line-height:1.5;">
@@ -412,9 +414,41 @@
             </div>
         </section>
 
-        <section id="panel-submissions" class="tab-panel" role="tabpanel" aria-labelledby="tab-submissions" hidden>
-            <div class="cardx card-pad">
-                <div class="muted">Coming soon.</div>
+        <section id="panel-submissions" class="tab-panel" role="tabpanel" aria-labelledby="tab-submissions">
+            <div class="grid">
+                <div class="cardx card-pad">
+                    Hello
+                </div>
+                <!-- RIGHT sidebar (unchanged) -->
+                <div class="cardx widget">
+                    @* keep your existing sidebar markup exactly *@
+                    <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
+                        <span class="tag">Hôm nay</span>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài mới</span>
+                        <strong>@newlyUploaded.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập sẵn có</span>
+                        <strong>@available.Count</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="muted">Bài tập quá hạn</span>
+                        <strong style="color:var(--danger);">@overdue.Count</strong>
+                    </div>
+
+                    <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses asp-action="Index">Tới Khóa học</a>
+                    <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+
+                    <div class="muted" style="margin-top:10px; line-height:1.5;">
+                        Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -440,6 +474,94 @@
           // default
           const first = tabs.find(t => t.classList.contains("active")) || tabs[0];
           if (first) activate(first);
+        })();
+                (function () {
+          function setBtnState(dz, enabled){
+            const btn = dz.closest("form")?.querySelector("button[type='submit']");
+            if (!btn) return;
+
+            btn.disabled = !enabled;
+            if (btn.disabled) {
+              btn.style.opacity = ".55";
+              btn.style.cursor = "not-allowed";
+            } else {
+              btn.style.opacity = "";
+              btn.style.cursor = "";
+            }
+          }
+
+          document.querySelectorAll("[data-dz]").forEach(dz => {
+            const input = dz.querySelector(".dz-input");
+            if (!input) return;
+
+            // If overdue (input disabled), keep submit disabled forever
+            if (input.disabled) {
+              setBtnState(dz, false);
+              return;
+            }
+
+            const update = () => {
+              const hasFile = input.files && input.files.length > 0;
+              setBtnState(dz, hasFile);
+            };
+
+            input.addEventListener("change", update);
+
+            // If you allow drag-drop into the label, this covers it too
+            dz.addEventListener("drop", () => setTimeout(update, 0));
+
+            // init state
+            update();
+          });
+        })();
+                (function () {
+          function humanSize(bytes){
+            const units = ["B","KB","MB","GB"];
+            let i = 0, n = bytes || 0;
+            while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+            return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+          }
+
+          document.querySelectorAll("[data-dz]").forEach(dz => {
+            const input = dz.querySelector(".dz-input");
+            const meta  = dz.querySelector("[data-dz-meta]");
+            const clear = dz.querySelector("[data-dz-clear]");
+            const submitBtn = dz.closest("form")?.querySelector("button[type='submit']");
+
+            if (!input || !meta) return;
+
+            function updateUI() {
+              const f = input.files && input.files[0];
+
+              if (!f) {
+                meta.textContent = "Chưa chọn file";
+                dz.classList.remove("dz-hasfile");
+                if (clear) clear.style.display = "none";
+                if (submitBtn) submitBtn.disabled = true;
+                return;
+              }
+
+              meta.textContent = `${f.name} • ${humanSize(f.size)}`;
+              dz.classList.add("dz-hasfile");
+              if (clear) clear.style.display = "";
+              if (submitBtn) submitBtn.disabled = false;
+            }
+
+            input.addEventListener("change", updateUI);
+
+            // If your dropzone sets input.files on drop, this catches it:
+            dz.addEventListener("drop", () => setTimeout(updateUI, 0));
+
+            if (clear) {
+              clear.addEventListener("click", () => {
+                if (input.disabled) return;
+                input.value = "";
+                updateUI();
+              });
+            }
+
+            updateUI();
+          });
         })();
     </script>
 

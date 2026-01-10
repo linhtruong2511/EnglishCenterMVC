@@ -192,3 +192,202 @@
         padding: 10px 0; border-top: 1px solid var(--border);
     }
     .stat:first-of-type{ border-top: none; }
+
+    /* Drag & Drop file picker */
+.dz { width: 100%; }
+
+.dz-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dz-box{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  border:1px dashed rgba(0,0,0,.22);
+  background: rgba(0,0,0,.02);
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  transition: .15s ease;
+}
+
+.dz-box:hover{
+  background: rgba(0,0,0,.03);
+  border-color: rgba(59,130,246,.45);
+}
+
+.dz-ico{
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: rgba(59,130,246,.10);
+  border: 1px solid rgba(59,130,246,.14);
+  display:flex; align-items:center; justify-content:center;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.dz-text{ min-width:0; }
+.dz-title{ font-weight:900; letter-spacing:-.2px; color: var(--ink); }
+.dz-sub{ margin-top:2px; font-size:.86rem; color: var(--muted); }
+
+.dz-meta{
+  font-size:.86rem;
+  text-align:right;
+  white-space:nowrap;
+}
+
+.dz-actions{ display:flex; justify-content:flex-end; margin-top:8px; }
+
+.dz-dragover .dz-box{
+  background: rgba(59,130,246,.08);
+  border-color: rgba(59,130,246,.70);
+}
+
+.dz-hasfile .dz-box{
+  border-style: solid;
+  border-color: rgba(34,197,94,.35);
+  background: rgba(34,197,94,.06);
+}
+
+.dz-disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+/* Compact submit row */
+.subrow {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+/* Compact dropzone */
+.dz {
+    position: relative;
+    width: 100%;
+}
+
+.dz-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dz-compact {
+    flex: 1 1 auto;
+}
+
+    .dz-compact .dz-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        border: 1px dashed rgba(0,0,0,.22);
+        background: rgba(0,0,0,.02);
+        border-radius: 12px;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: .15s ease;
+    }
+
+        .dz-compact .dz-box:hover {
+            border-color: rgba(59,130,246,.55);
+            background: rgba(59,130,246,.05);
+        }
+
+    .dz-compact .dz-ico {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: rgba(59,130,246,.10);
+        border: 1px solid rgba(59,130,246,.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        flex: 0 0 auto;
+    }
+
+    .dz-compact .dz-title {
+        font-weight: 900;
+        color: var(--ink);
+        white-space: nowrap;
+    }
+
+    .dz-compact .dz-meta {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: .86rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 240px;
+    }
+
+/* Clear button */
+.dz-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid var(--border);
+    background: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    font-weight: 900;
+    cursor: pointer;
+    color: rgba(0,0,0,.65);
+}
+
+    .dz-clear:hover {
+        background: rgba(0,0,0,.03);
+    }
+
+/* drag states */
+.dz-dragover .dz-box {
+    border-color: rgba(59,130,246,.85);
+    background: rgba(59,130,246,.08);
+}
+
+.dz-hasfile .dz-box {
+    border-style: solid;
+    border-color: rgba(34,197,94,.35);
+    background: rgba(34,197,94,.06);
+}
+
+/* disable */
+.dz-disabled {
+    opacity: .55;
+}
+
+    .dz-disabled .dz-box {
+        cursor: not-allowed;
+    }
+
+@media(max-width: 768px) {
+    .subrow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dz-compact .dz-meta {
+        max-width: 100%;
+    }
+}
+
+.btnx:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
