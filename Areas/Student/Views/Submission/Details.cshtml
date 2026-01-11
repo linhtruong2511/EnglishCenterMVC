@@ -43,7 +43,7 @@
                     <span class="pill">Submitted: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</span>
                     @if (isGraded && Model.GradedAt != default(DateTime))
                     {
-                        <span class="pill">Graded: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        <span class="pill">Graded: @Model.GradedAt?.ToString("dd/MM/yyyy HH:mm")</span>
                     }
                 </div>
             </div>
@@ -129,7 +129,7 @@
 
                                 @if (Model.GradedAt != default(DateTime))
                                 {
-                                    <span class="tag">Graded: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    <span class="tag">Graded: @Model.GradedAt?.ToString("dd/MM/yyyy HH:mm")</span>
                                 }
                             </div>
                         </div>
@@ -139,7 +139,7 @@
                         <div class="time">
                             @if (Model.GradedAt != default(DateTime))
                             {
-                                <span>Chấm lúc: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                <span>Chấm lúc: @Model.GradedAt?.ToString("dd/MM/yyyy HH:mm")</span>
                             }
                             else
                             {
