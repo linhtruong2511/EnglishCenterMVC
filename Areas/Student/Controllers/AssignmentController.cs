@@ -64,7 +64,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
 
             try
             {
-                await submissionService.SubmitAssignment(assignmentId, userId, submissionFile);
+                await submissionService.SubmitAssignment(assignmentId, "HV001", submissionFile);
                 return RedirectToAction("Index", "Submission", new { area = "Student" });
             }
             catch (DbUpdateException dbEx)
