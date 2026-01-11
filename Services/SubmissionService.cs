@@ -36,7 +36,7 @@ namespace EnglishCenterMVC.Services
 
             var existingSubmission = await context.Submissions
                 .Where(s => s.UserId == userId && s.AssignmentId == assignmentId)
-                .FirstAsync();
+                .FirstOrDefaultAsync();
 
             if (existingSubmission is not null)
             {

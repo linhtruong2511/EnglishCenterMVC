@@ -14,9 +14,30 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             this.submissionService = submissionService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            try
+            {
+                var list = await submissionService.GetSubmissions();
+                return View(list);
+            } catch
+            {
+                return NotFound();
+            }
+        }
+        
+        public IActionResult Detail(int subId)
+        {
+            if(subId <= 0 ) return BadRequest("Submission khong ton tai");
+            try
+            {
+                var submission = submissionService.GetSubmission(subId);
+                return View(submission);
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
     }
 }

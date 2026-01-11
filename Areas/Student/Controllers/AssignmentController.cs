@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
-using EnglishCenterMVC.Areas.Student.Models;
+﻿using EnglishCenterMVC.Areas.Student.Models;
 using EnglishCenterMVC.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
@@ -22,7 +24,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             {
                 var availableAssignments = await assignmentService.GetAssignmentsAsync();
                 var overdueAssignments = await assignmentService.GetOverdueAssignmentsAsync();
-                var newlyUploaded = availableAssignments.Where(a => (a.CreateAt - DateTime.Now).TotalDays <= 3).Count();
+                var newlyUploaded = availableAssignments.Where(a => (DateTime.Now - a.CreateAt).TotalDays <= 3).Count();
                 return View(new AssignmentVM
                 {
                     Available = availableAssignments.Count(),
@@ -46,6 +48,32 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             } catch
             {
                 return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitFile(int assignmentId, IFormFile submissionFile)
+        {
+            if (assignmentId <= 0) return BadRequest("Invalid assignmentId.");
+            if (submissionFile == null || submissionFile.Length == 0) return BadRequest("File không tồn tại");
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized("User not logged in / missing NameIdentifier.");
+
+            try
+            {
+                await submissionService.SubmitAssignment(assignmentId, userId, submissionFile);
+                return RedirectToAction("Index", "Submission", new { area = "Student" });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return BadRequest("DB error: " + (dbEx.InnerException?.Message ?? dbEx.Message));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Gửi bài thất bại: " + ex.Message);
             }
         }
     }
