@@ -1,0 +1,205 @@
+﻿@model EnglishCenterMVC.Models.Submission
+@using System
+
+@{
+    ViewData["Title"] = "Submission Details";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+
+    var s = Model;
+    var hasFile = s != null && !string.IsNullOrWhiteSpace(s.FileUrl);
+
+    // Treat default(DateTime) as "not graded yet" if DB column is non-nullable
+    var isGraded = s != null && (s.GradedAt != default(DateTime) || s.Score > 0 || !string.IsNullOrWhiteSpace(s.Feedback));
+
+    string BadgeText() => isGraded ? "Graded" : "Pending";
+    string BadgeClass() => isGraded ? "ok" : "warn";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/ass.css" />
+</head>
+
+<div class="wrap">
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <div class="hero-title">Submission #@Model.Id</div>
+                <div class="hero-sub">
+                    @if (Model.Assignment != null)
+                    {
+                        <span><strong>@Model.Assignment.Title</strong></span>
+                        <span class="muted" style="opacity:.9;"> • Assignment #@Model.AssignmentId</span>
+                    }
+                    else
+                    {
+                        <span>Assignment #@Model.AssignmentId</span>
+                    }
+                </div>
+
+                <div class="pillrow">
+                    <span class="pill">Status: @BadgeText()</span>
+                    <span class="pill">Submitted: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    @if (isGraded && Model.GradedAt != default(DateTime))
+                    {
+                        <span class="pill">Graded: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    }
+                </div>
+            </div>
+
+            <div class="pill">Student Area</div>
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <!-- LEFT: Main content -->
+        <div class="cardx card-pad">
+
+            <div class="hrow">
+                <h3>Thông tin bài nộp</h3>
+                <div class="muted">Chi tiết & kết quả</div>
+            </div>
+
+            <div class="alist" style="margin-top:12px;">
+                <div class="a">
+                    <div class="a-left">
+                        <div class="ico">📄</div>
+                        <div class="a-text">
+                            <div class="a-title">File đã nộp</div>
+                            <div class="a-desc">
+                                @if (hasFile)
+                                {
+                                    <span class="muted">@Model.FileUrl</span>
+                                }
+                                else
+                                {
+                                    <span class="muted">Chưa có file (hoặc file bị lỗi đường dẫn).</span>
+                                }
+                            </div>
+
+                            <div class="meta">
+                                <span class="tag gray">Submission #@Model.Id</span>
+                                <span class="tag gray">Assignment #@Model.AssignmentId</span>
+                                <span class="tag @BadgeClass()">@BadgeText()</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="a-right">
+                        <a class="btnx primary"
+                           href="@(hasFile? Url.Content(Model.FileUrl) : "javascript:void(0)")"
+                           target="_blank"
+                           style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                            Download
+                        </a>
+
+                        <div class="time">
+                            Nộp lúc: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="a">
+                    <div class="a-left">
+                        <div class="ico">🏁</div>
+                        <div class="a-text">
+                            <div class="a-title">Kết quả</div>
+                            <div class="a-desc">
+                                @if (isGraded)
+                                {
+                                    <span>Đã có điểm/nhận xét.</span>
+                                }
+                                else
+                                {
+                                    <span>Đang chờ chấm.</span>
+                                }
+                            </div>
+
+                            <div class="meta">
+                                @if (isGraded)
+                                {
+                                    <span class="tag ok">Score: @Model.Score</span>
+                                }
+                                else
+                                {
+                                    <span class="tag warn">Pending</span>
+                                }
+
+                                @if (Model.GradedAt != default(DateTime))
+                                {
+                                    <span class="tag">Graded: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="a-right">
+                        <div class="time">
+                            @if (Model.GradedAt != default(DateTime))
+                            {
+                                <span>Chấm lúc: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="a">
+                    <div class="a-left">
+                        <div class="ico">💬</div>
+                        <div class="a-text">
+                            <div class="a-title">Nhận xét</div>
+                            <div class="a-desc" style="max-height:none;">
+                                @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+                                {
+                                    <div style="line-height:1.65;">@Model.Feedback</div>
+                                }
+                                else
+                                {
+                                    <span class="muted">Chưa có nhận xét.</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="a-right">
+                        <span class="tag @(string.IsNullOrWhiteSpace(Model.Feedback) ? "gray" : "ok")">
+                            @(string.IsNullOrWhiteSpace(Model.Feedback) ? "No feedback" : "Has feedback")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Quick actions -->
+        <div class="cardx widget">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <h3 style="margin:0; font-weight:900;">Actions</h3>
+                <span class="tag">Detail</span>
+            </div>
+
+            <a class="btnx primary mb-2"
+               asp-area="Student"
+               asp-controller="Submission"
+               asp-action="Index">
+                ← My Submissions
+            </a>
+
+            <a class="btnx"
+               asp-area="Student"
+               asp-controller="Assignment"
+               asp-action="Index">
+                ← Assignments
+            </a>
+
+            <div class="muted" style="margin-top:10px; line-height:1.5;">
+                Tip: nếu file mở lỗi, báo giảng viên — thường là do đường dẫn FileUrl chưa map đúng StaticFiles.
+            </div>
+        </div>
+    </div>
+</div>

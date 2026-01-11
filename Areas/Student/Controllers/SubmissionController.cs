@@ -26,12 +26,12 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             }
         }
         
-        public IActionResult Detail(int subId)
+        public async Task<IActionResult> Detail(int subId)
         {
             if(subId <= 0 ) return BadRequest("Submission khong ton tai");
             try
             {
-                var submission = submissionService.GetSubmission(subId);
+                var submission = await submissionService.GetSubmission(subId);
                 return View(submission);
             }
             catch
