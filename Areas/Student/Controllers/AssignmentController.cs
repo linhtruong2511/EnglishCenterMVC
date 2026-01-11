@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using EnglishCenterMVC.Areas.Student.Models;
+﻿using EnglishCenterMVC.Areas.Student.Models;
 using EnglishCenterMVC.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +15,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             this.assignmentService = assignmentService;
             this.submissionService = submissionService;
         }
+
         public async Task<IActionResult> Index(int courseId)
         {
             try

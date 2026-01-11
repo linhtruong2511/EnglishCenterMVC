@@ -11,7 +11,7 @@
         public int AssignmentId { get; set; }
         public Assignment Assignment { get; set; }
 
-        public string FileUrl { get; set; }
+        public string? FileUrl { get; set; }
 
         public int Score { get; set; }
         public string Feedback { get; set; }
