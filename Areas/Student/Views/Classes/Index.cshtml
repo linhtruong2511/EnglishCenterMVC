@@ -130,13 +130,12 @@
                         </div>
 
                         <div class="muted" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
-                            <span>Course: <strong style="color:rgba(0,0,0,.82)">@courseName</strong></span>
+                            <span>Course: <strong style="color:rgba(0,0,0,.82)">Class #@c.Id</strong></span>
                             <span>•</span>
                             <span>Max: <strong style="color:rgba(0,0,0,.82)">@c.MaxStudent</strong></span>
                         </div>
 
                         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-                            <span class="pill gray">Class #@c.Id</span>
                             @if (courseId > 0)
                             {
                                 <span class="pill gray">Course #@courseId</span>
