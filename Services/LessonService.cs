@@ -65,6 +65,7 @@ namespace EnglishCenterMVC.Services
             {
                 var videoUrl = await fileService.SaveVideoAsync(dto.Video, "videos/lessons"); 
                 lesson.videoUrl = videoUrl;
+                lesson.TotalSeconds = dto.TotalSeconds;
             }
             
             _context.Lessons.Add(lesson);
@@ -99,6 +100,7 @@ namespace EnglishCenterMVC.Services
                 var videoUrl = await fileService.SaveVideoAsync(dto.Video, "videos/lessons");
                 fileService.Delete(existing.videoUrl);
                 existing.videoUrl = videoUrl;
+                existing.TotalSeconds = dto.TotalSeconds;
             }
 
             await _context.SaveChangesAsync();

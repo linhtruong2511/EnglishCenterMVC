@@ -1,5 +1,6 @@
 ﻿@using System.Linq
 @using System
+@using EnglishCenterMVC.Extensions
 @{
     ViewData["Title"] = "Sections";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
@@ -128,15 +129,14 @@
                                     foreach (var l in lessons)
                                     {
                                         var lessonName = l.Title ?? $"Lesson {l.Id}";
-                                        var durationText = "— phút"; // keep placeholder, wire later
-                                                                     <div class="lesson-row">
-                                                                         <div class="l-left">
-                                                                             <div class="l-ico">⌁</div>
 
+                                        <div class="lesson-row">
+                                            <div class="l-left">
+                                                <div class="l-ico">⌁</div>
                                                 <div class="l-text">
                                                     <div class="l-name" title="@lessonName">@lessonName</div>
                                                     <div class="l-sub">
-                                                        <span>@durationText</span>
+                                                        <span>@TimeFormatUtils.ToMinuteSecond(l.TotalSeconds ?? 0)</span>
                                                         <span class="dot"></span>
                                                         <span class="muted">Lesson #@l.Id</span>
                                                     </div>

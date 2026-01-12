@@ -13,6 +13,8 @@
     <div class="col-md-4">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="TotalSeconds" type="hidden" id="totalSeconds" />
+
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
@@ -55,4 +57,29 @@
     <a asp-action="Edit" asp-controller="Sections" asp-route-id="@ViewBag.sectionId">Back to List</a>
 
 </div>
+
+<script>
+        document.querySelector('input[name="Video"]').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.src = URL.createObjectURL(file);
+
+        video.onloadedmetadata = function () {
+            URL.revokeObjectURL(video.src);
+
+            const seconds = Math.ceil(video.duration);
+            document.getElementById("totalSeconds").value = seconds;
+
+            console.log("Video duration:", seconds, "seconds");
+        };
+
+        video.onerror = function () {
+            alert("Không đọc được metadata video");
+            document.getElementById("totalSeconds").value = 0;
+        };
+    });
+</script>
 

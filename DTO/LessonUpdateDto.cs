@@ -10,5 +10,6 @@
         public IFormFile? Image { get; set; }
         public int? Order { get; set; }
         public int SectionId {  get; set; }
+        public int TotalSeconds { get; set; }
     }
 }

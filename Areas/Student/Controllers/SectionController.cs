@@ -37,7 +37,8 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
                     {
                         Id = l.Id,
                         Title = l.Title,
-                        IsCompleted = lessonService.IsCompleted(l.Id, userId)
+                        IsCompleted = lessonService.IsCompleted(l.Id, userId),
+                        TotalSeconds = l.TotalSeconds
                     }).ToList()
                 });
             }
