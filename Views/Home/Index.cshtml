@@ -10,7 +10,7 @@
                      class="img-fluid" alt="Sample image">
             </div>
             <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form asp-action="Login" method="post">
+                <form asp-action="Login" asp-controller="Auth" method="post">
                     @if (TempData["Error"] is not null)
                     {
                         <div class="alert alert-danger">@TempData["Error"]</div>
