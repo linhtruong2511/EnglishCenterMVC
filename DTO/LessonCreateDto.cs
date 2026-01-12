@@ -12,5 +12,7 @@ namespace EnglishCenterMVC.DTO
         public int? Order { get; set; }
         [Required(ErrorMessage = "Id section là bắt buộc")]
         public int SectionId { get; set; }
+        public int TotalMinutes { get; set; }
+        public int TotalSeconds { get; set; }
     }
 }

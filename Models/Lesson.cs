@@ -15,6 +15,9 @@ namespace EnglishCenterMVC.Models
         public string? fileTitle { get; set; }
         public string? imageUrl { get; set; }
 
+        public int? TotalMinutes { get; set; }
+        public int? TotalSeconds { get; set; }
+
         public int Order { get; set; }
 
         public int SectionId { get; set; }
