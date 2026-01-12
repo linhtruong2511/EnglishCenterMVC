@@ -83,19 +83,33 @@
         .ToList();
 
     int DueCountOn(DateTime date)
-        => liveAssignments.Count(a => a.Deadline.Date == date.Date);
+    {
+        var start = date.Date;
+        var end = start.AddDays(1);
+
+        return liveAssignments.Count(a =>
+            a.Deadline >= start && a.Deadline < end
+        );
+    }
 
     string CalDotClass(DateTime date)
     {
-        // pick worst severity among due items that day
-        var items = liveAssignments.Where(a => a.Deadline.Date == date.Date).ToList();
+        var start = date.Date;
+        var end = start.AddDays(1);
+
+        var items = liveAssignments
+            .Where(a => a.Deadline >= start && a.Deadline < end)
+            .ToList();
+
         if (!items.Any()) return "none";
 
+        // severity logic using NOW (same as before)
         if (items.Any(a => a.Deadline < now)) return "danger";
         if (items.Any(a => (a.Deadline - now).TotalDays <= 1)) return "danger";
         if (items.Any(a => (a.Deadline - now).TotalDays <= 3)) return "warn";
         return "ok";
     }
+
 }
 
 @section Styles {

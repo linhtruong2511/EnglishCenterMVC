@@ -1,10 +1,17 @@
 ﻿@model IEnumerable<EnglishCenterMVC.Models.Course>
+@using System.Linq
+@using System.Collections.Generic
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
-}
 
+    // Categories from DB (controller puts ALL categories here)
+    var cats = (ViewBag.Categories as IEnumerable<EnglishCenterMVC.Models.Category>)
+               ?.OrderBy(c => c.Id)
+               .ToList()
+               ?? new List<EnglishCenterMVC.Models.Category>();
+}
 
 @section Styles {
     <link rel="stylesheet" href="~/css/ass.css" />
@@ -53,15 +60,14 @@
         </div>
     </div>
 
-
+    <!-- Toolbar: render categories from DB -->
     <div class="toolbar">
         <button class="chip active" type="button" data-filter="all">All</button>
-        <button class="chip" type="button" data-filter="cat-1">TOEIC</button>
-        <button class="chip" type="button" data-filter="cat-3">IELTS Academic</button>
-        <button class="chip" type="button" data-filter="cat-4">IELTS General</button>
-        <button class="chip" type="button" data-filter="cat-2">Combo đặc biệt</button>
-        <button class="chip" type="button" data-filter="cat-5">Tiếng Anh cơ bản</button>
-        <button class="chip" type="button" data-filter="cat-6">HSK</button>
+
+        @foreach (var c in cats)
+        {
+            <button class="chip" type="button" data-filter="cat-@c.Id">@c.Name</button>
+        }
     </div>
 
     @if (Model == null || !Model.Any())
@@ -76,10 +82,16 @@
         <div id="courseGrid" class="grid">
             @foreach (var item in Model)
             {
-                // Use Category.Id for filtering (per your table)
-                var catId = item.Category?.Id ?? 0;
+                // IMPORTANT: filter should use FK CategoryId if available
+                var catId = item.CategoryId;              // <-- change from item.Category?.Id
                 var categoryKey = $"cat-{catId}";
-                var categoryName = item.Category?.Name ?? "Unknown";
+
+                // Name can still be shown (either from navigation or map via cats)
+                var categoryName =
+                item.Category?.Name
+                ?? cats.FirstOrDefault(x => x.Id == catId)?.Name
+                ?? "Unknown";
+
                 var price = item.Price;
                 var salePct = item.Sale; // assume % (0-100)
                 var hasSale = salePct != null && salePct > 0;
@@ -108,33 +120,6 @@
                         <div class="meta">
                             <span class="pill">@categoryName</span>
 
-                            @switch (catId)
-                            {
-                                case 1:
-                                    <span class="pill">TOEIC</span>
-                                    break;
-                                case 3:
-
-                                    <span class="pill">IELTS Academic</span>
-                                    break;
-                                case 4:
-
-                                    <span class="pill">IELTS General</span>
-                                    break;
-                                case 2:
-
-                                    <span class="pill">Combo</span>
-                                    break;
-                                case 5:
-
-                                    <span class="pill">Basic</span>
-                                    break;
-                                case 6:
-
-                                    <span class="pill">HSK</span>
-                                    break;
-                            }
-
                             @if (hasSale)
                             {
                                 <span class="pill">On Sale</span>
@@ -157,18 +142,21 @@
                     </div>
 
                     <div class="btnrow">
-                        <a class="btnx primary" asp-controller="Section" asp-action="Index" asp-route-courseId="@item.Id">Open</a>
-                        <a class="btnx" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a class="btnx primary"
+                           asp-controller="Section"
+                           asp-action="Index"
+                           asp-route-courseId="@item.Id">Open</a>
+                        <a class="btnx"
+                           asp-action="Details"
+                           asp-route-id="@item.Id">Details</a>
                     </div>
                 </div>
             }
-
         </div>
     }
 </div>
 
 <script>
-    // Simple client-side search + category filter (baseline; swap to server-side later if needed)
     (function () {
         const search = document.getElementById("courseSearch");
         const grid = document.getElementById("courseGrid");
@@ -185,24 +173,26 @@
             cards.forEach(card => {
                 const name = (card.getAttribute("data-name") || "").toLowerCase();
                 const desc = (card.getAttribute("data-desc") || "").toLowerCase();
-                const cat = (card.getAttribute("data-category") || "").toLowerCase();
+                const cat  = (card.getAttribute("data-category") || "").toLowerCase();
 
                 const matchText = !q || name.includes(q) || desc.includes(q);
-                const matchCat = activeFilter === "all" || cat === activeFilter;
+                const matchCat  = activeFilter === "all" || cat === activeFilter;
 
                 card.style.display = (matchText && matchCat) ? "" : "none";
             });
         }
-        if (search) {
-            search.addEventListener("input", applyFilter);
-        }
+
+        if (search) search.addEventListener("input", applyFilter);
+
         chips.forEach(btn => {
             btn.addEventListener("click", () => {
                 chips.forEach(x => x.classList.remove("active"));
                 btn.classList.add("active");
-                activeFilter = btn.getAttribute("data-filter");
+                activeFilter = btn.getAttribute("data-filter") || "all";
                 applyFilter();
             });
         });
+
+        applyFilter();
     })();
 </script>
