@@ -13,6 +13,10 @@
 
     string BadgeText() => isGraded ? "Graded" : "Pending";
     string BadgeClass() => isGraded ? "ok" : "warn";
+    var fileUrl = hasFile ? Url.Content(Model.FileUrl) : "";
+    var ext = hasFile ? System.IO.Path.GetExtension(Model.FileUrl)?.ToLowerInvariant() : "";
+    var isPdf = ext == ".pdf";
+    var isImg = ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".webp";
 }
 
 <head>
@@ -26,11 +30,12 @@
         <div class="hero-inner">
             <div>
                 <div class="hero-title">Submission #@Model.Id</div>
+
                 <div class="hero-sub">
                     @if (Model.Assignment != null)
                     {
                         <span><strong>@Model.Assignment.Title</strong></span>
-                        <span class="muted" style="opacity:.9;"> • Assignment #@Model.AssignmentId</span>
+                        <span class="fw-semibold" style="opacity:.9;"> • Assignment #@Model.AssignmentId</span>
                     }
                     else
                     {
@@ -54,129 +59,170 @@
 
     <div class="grid">
 
-        <!-- LEFT: Main content -->
+        <!-- LEFT -->
         <div class="cardx card-pad">
 
             <div class="hrow">
-                <h3>Thông tin bài nộp</h3>
-                <div class="muted">Chi tiết & kết quả</div>
+                <h3>Submission Overview</h3>
+                <span class="tag @BadgeClass()">@BadgeText()</span>
             </div>
 
-            <div class="alist" style="margin-top:12px;">
-                <div class="a">
+            <!-- Top summary row -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;">
+                <div class="a" style="margin:0;">
                     <div class="a-left">
-                        <div class="ico">📄</div>
+                        <div class="ico">📤</div>
                         <div class="a-text">
-                            <div class="a-title">File đã nộp</div>
-                            <div class="a-desc">
-                                @if (hasFile)
-                                {
-                                    <span class="muted">@Model.FileUrl</span>
-                                }
-                                else
-                                {
-                                    <span class="muted">Chưa có file (hoặc file bị lỗi đường dẫn).</span>
-                                }
-                            </div>
-
-                            <div class="meta">
-                                <span class="tag gray">Submission #@Model.Id</span>
-                                <span class="tag gray">Assignment #@Model.AssignmentId</span>
-                                <span class="tag @BadgeClass()">@BadgeText()</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="a-right">
-                        <a class="btnx primary"
-                           href="@(hasFile? Url.Content(Model.FileUrl) : "javascript:void(0)")"
-                           target="_blank"
-                           style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
-                            Download
-                        </a>
-
-                        <div class="time">
-                            Nộp lúc: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
+                            <div class="a-title">Submitted</div>
+                            <div class="a-desc">@Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="a">
+                <div class="a" style="margin:0;">
                     <div class="a-left">
                         <div class="ico">🏁</div>
                         <div class="a-text">
-                            <div class="a-title">Kết quả</div>
+                            <div class="a-title">Result</div>
                             <div class="a-desc">
                                 @if (isGraded)
                                 {
-                                    <span>Đã có điểm/nhận xét.</span>
+                                    <span>Score: <strong>@Model.Score</strong></span>
                                 }
                                 else
                                 {
-                                    <span>Đang chờ chấm.</span>
+                                    <span class="muted">Pending</span>
                                 }
                             </div>
 
-                            <div class="meta">
-                                @if (isGraded)
-                                {
-                                    <span class="tag ok">Score: @Model.Score</span>
-                                }
-                                else
-                                {
-                                    <span class="tag warn">Pending</span>
-                                }
-
-                                @if (Model.GradedAt != default(DateTime))
-                                {
-                                    <span class="tag">Graded: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="a-right">
-                        <div class="time">
                             @if (Model.GradedAt != default(DateTime))
                             {
-                                <span>Chấm lúc: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                            }
-                            else
-                            {
-                                <span>—</span>
+                                <div class="meta" style="margin-top:8px;">
+                                    <span class="tag">Graded: @Model.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
                             }
                         </div>
-                    </div>
-                </div>
-
-                <div class="a">
-                    <div class="a-left">
-                        <div class="ico">💬</div>
-                        <div class="a-text">
-                            <div class="a-title">Nhận xét</div>
-                            <div class="a-desc" style="max-height:none;">
-                                @if (!string.IsNullOrWhiteSpace(Model.Feedback))
-                                {
-                                    <div style="line-height:1.65;">@Model.Feedback</div>
-                                }
-                                else
-                                {
-                                    <span class="muted">Chưa có nhận xét.</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="a-right">
-                        <span class="tag @(string.IsNullOrWhiteSpace(Model.Feedback) ? "gray" : "ok")">
-                            @(string.IsNullOrWhiteSpace(Model.Feedback) ? "No feedback" : "Has feedback")
-                        </span>
                     </div>
                 </div>
             </div>
+
+            <!-- File block -->
+            <div class="a a-stretch" style="margin-top:12px;">
+                <div class="a-left">
+                    <div class="ico">📄</div>
+                    <div class="a-text">
+                        <div class="a-title">Submitted File</div>
+                        <div class="a-desc">
+                            @if (hasFile)
+                            {
+                                <div class="cardx card-pad" id="previewCard" style="margin-top:14px; display:none;">
+                                    <div class="hrow">
+                                        <h3>Xem trước</h3>
+                                        <div style="display:flex; gap:10px; align-items:center;">
+                                            <span class="tag gray">@ext</span>
+                                            <button class="btnx" type="button" id="btnClosePreview">Close</button>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top:12px;">
+                                        @if (isPdf)
+                                        {
+                                            <iframe id="previewFrame"
+                                                    src="@fileUrl"
+                                                    style="width:100%; height:72vh; border:1px solid var(--border); border-radius:14px; background:#fff;">
+                                            </iframe>
+                                        }
+                                        else if (isImg)
+                                        {
+                                            <img src="@fileUrl"
+                                                 alt="preview"
+                                                 style="width:100%; max-height:72vh; object-fit:contain; border:1px solid var(--border); border-radius:14px; background:#fff;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="muted" style="line-height:1.6;">
+                                                File này không hỗ trợ xem trực tiếp trong trang.
+                                                Vui lòng bấm <strong>Download</strong> để mở.
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="muted">Chưa có file (hoặc file bị lỗi đường dẫn).</span>
+                            }
+                        </div>
+
+                        <div class="meta">
+                            <span class="tag gray">Submission #@Model.Id</span>
+                            <span class="tag gray">Assignment #@Model.AssignmentId</span>
+                            <span class="tag @BadgeClass()">@BadgeText()</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="a-right" style="min-width: 170px;">
+                    <button class="btnx primary"
+                            type="button"
+                            id="btnPreview"
+                            @(hasFile ? "" : "disabled")
+                            style="@(hasFile ? "" : "opacity:.45; cursor:not-allowed;")">
+                        Preview
+                    </button>
+
+                    <a class="btnx"
+                       href="@(hasFile? fileUrl : "javascript:void(0)")"
+                       download
+                       style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                        Download
+                    </a>
+
+                    <div class="time">
+                        @if (hasFile)
+                        {
+                            <span>Ready</span>
+                        }
+                        else
+                        {
+                            <span>Unavailable</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback block -->
+            <div class="a" style="margin-top:12px;">
+                <div class="a-left">
+                    <div class="ico">💬</div>
+                    <div class="a-text">
+                        <div class="a-title">Feedback</div>
+
+                        <div class="a-desc" style="max-height:none; margin-top:6px;">
+                            @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+                            {
+                                <div style="line-height:1.75;">
+                                    @Model.Feedback
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="muted">Chưa có nhận xét.</span>
+                            }
+                        </div>
+
+                        <div class="meta" style="margin-top:10px;">
+                            <span class="tag @(string.IsNullOrWhiteSpace(Model.Feedback) ? "gray" : "ok")">
+                                @(string.IsNullOrWhiteSpace(Model.Feedback) ? "No feedback" : "Has feedback")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- RIGHT: Quick actions -->
+        <!-- RIGHT -->
         <div class="cardx widget">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                 <h3 style="margin:0; font-weight:900;">Actions</h3>
@@ -202,4 +248,26 @@
             </div>
         </div>
     </div>
+    <script>
+        (() => {
+          const btn = document.getElementById("btnPreview");
+          const card = document.getElementById("previewCard");
+          const closeBtn = document.getElementById("btnClosePreview");
+
+          if (!btn || !card) return;
+
+          btn.addEventListener("click", () => {
+            card.style.display = "block";
+            card.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+
+          if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+              card.style.display = "none";
+            });
+          }
+        })();
+    </script>
+
 </div>
+

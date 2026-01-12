@@ -119,16 +119,9 @@
 
                                 <div class="a-right">
                                     <a class="btnx"
-                                       href="@(hasFile? Url.Content(s.FileUrl) : "javascript:void(0)")"
-                                       target="_blank"
-                                       style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
-                                        Download
-                                    </a>
-
-                                    <a class="btnx"
                                        asp-area="Student"
                                        asp-controller="Submission"
-                                       asp-action="Detail"
+                                       asp-action="Details"
                                        asp-route-subId="@s.Id">
                                         Details
                                     </a>
@@ -162,7 +155,7 @@
 
                 @* Change Courses -> Course if your controller name is CourseController *@
                 <a class="btnx"
-                   asp-area="Student" asp-controller="Course" asp-action="Index">
+                   asp-area="Student" asp-controller="Courses" asp-action="Index">
                     Tới Khóa học
                 </a>
 

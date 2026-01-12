@@ -391,3 +391,44 @@
     cursor: not-allowed;
     pointer-events: none;
 }
+
+/* Make that row flexible + allow wrapping */
+.a-stretch{
+  align-items: stretch;
+  gap: 14px;
+}
+
+/* Keep left content flexible */
+.a-stretch .a-left{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Right actions stay compact, aligned */
+.a-stretch .a-right{
+  flex: 0 0 220px;
+  align-self: stretch;
+  justify-content: flex-start;
+}
+
+/* On smaller screens, stack buttons under content */
+@media (max-width: 768px){
+  .a-stretch{
+    flex-direction: column;
+  }
+  .a-stretch .a-right{
+    flex: 1 1 auto;
+    width: 100%;
+    align-items: stretch;
+  }
+  .a-stretch .a-right .btnx{
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Make preview card always use full width */
+#previewCard{
+  width: 100%;
+}
+
