@@ -5,201 +5,248 @@
     ViewData["Title"] = "Submission Details";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
 
-    var s = Model;
-    var hasFile = s != null && !string.IsNullOrWhiteSpace(s.FileUrl);
+    var hasFile = Model != null && !string.IsNullOrWhiteSpace(Model.FileUrl);
+    var fileUrl = hasFile ? Url.Content(Model!.FileUrl) : "";
+    var fileName = hasFile ? System.IO.Path.GetFileName(Model!.FileUrl) : "No file";
 
-    // Treat default(DateTime) as "not graded yet" if DB column is non-nullable
-    var isGraded = s != null && (s.GradedAt != default(DateTime) || s.Score > 0 || !string.IsNullOrWhiteSpace(s.Feedback));
-
-    string BadgeText() => isGraded ? "Graded" : "Pending";
-    string BadgeClass() => isGraded ? "ok" : "warn";
+    var graded = Model != null && (Model.GradedAt != default(DateTime) || Model.Score > 0 || !string.IsNullOrWhiteSpace(Model.Feedback));
+    var badgeText = graded ? "Graded" : "Pending";
+    var badgeClass = graded ? "ok" : "warn";
 }
 
 <head>
     <link rel="stylesheet" href="~/css/ass.css" />
 </head>
 
-<div class="wrap">
+<body>
+    <div class="wrap">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-inner">
+                <div>
+                    <div class="hero-title">Submission #@Model!.Id</div>
+                    <div class="hero-sub">
+                        @if (Model.Assignment != null)
+                        {
+                            <span><strong>@Model.Assignment.Title</strong></span>
+                            <span class="muted" style="opacity:.9;"> • Assignment #@Model.AssignmentId</span>
+                        }
+                        else
+                        {
+                            <span>Assignment #@Model.AssignmentId</span>
+                        }
+                    </div>
 
-    <!-- Hero -->
-    <div class="hero">
-        <div class="hero-inner">
-            <div>
-                <div class="hero-title">Submission #@Model.Id</div>
-                <div class="hero-sub">
-                    @if (Model.Assignment != null)
-                    {
-                        <span><strong>@Model.Assignment.Title</strong></span>
-                        <span class="muted" style="opacity:.9;"> • Assignment #@Model.AssignmentId</span>
-                    }
-                    else
-                    {
-                        <span>Assignment #@Model.AssignmentId</span>
-                    }
+                    <div class="pillrow">
+                        <span class="pill">Status: @badgeText</span>
+                        <span class="pill">Submitted: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        @if (graded && Model.GradedAt != default(DateTime))
+                        {
+                            <span class="pill">Graded: @Model.GradedAt.ToString()</span>
+                        }
+                    </div>
                 </div>
 
-                <div class="pillrow">
-                    <span class="pill">Status: @BadgeText()</span>
-                    <span class="pill">Submitted: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                    @if (isGraded && Model.GradedAt != default(DateTime))
-                    {
-                        <span class="pill">Graded: @Model.GradedAt?.ToString("dd/MM/yyyy HH:mm")</span>
-                    }
-                </div>
+                <div class="pill">Student Area</div>
             </div>
-
-            <div class="pill">Student Area</div>
         </div>
-    </div>
 
-    <div class="grid">
+        <div class="grid">
 
-        <!-- LEFT: Main content -->
-        <div class="cardx card-pad">
+            <!-- LEFT -->
+            <div class="cardx card-pad">
 
-            <div class="hrow">
-                <h3>Thông tin bài nộp</h3>
-                <div class="muted">Chi tiết & kết quả</div>
-            </div>
-
-            <div class="alist" style="margin-top:12px;">
-                <div class="a">
-                    <div class="a-left">
-                        <div class="ico">📄</div>
-                        <div class="a-text">
-                            <div class="a-title">File đã nộp</div>
-                            <div class="a-desc">
-                                @if (hasFile)
-                                {
-                                    <span class="muted">@Model.FileUrl</span>
-                                }
-                                else
-                                {
-                                    <span class="muted">Chưa có file (hoặc file bị lỗi đường dẫn).</span>
-                                }
-                            </div>
-
-                            <div class="meta">
-                                <span class="tag gray">Submission #@Model.Id</span>
-                                <span class="tag gray">Assignment #@Model.AssignmentId</span>
-                                <span class="tag @BadgeClass()">@BadgeText()</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="a-right">
-                        <a class="btnx primary"
-                           href="@(hasFile? Url.Content(Model.FileUrl) : "javascript:void(0)")"
-                           target="_blank"
-                           style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
-                            Download
-                        </a>
-
-                        <div class="time">
-                            Nộp lúc: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
-                        </div>
-                    </div>
+                <div class="hrow">
+                    <h3>Submitted File</h3>
+                    <div class="muted">Preview & download</div>
                 </div>
 
-                <div class="a">
-                    <div class="a-left">
-                        <div class="ico">🏁</div>
-                        <div class="a-text">
-                            <div class="a-title">Kết quả</div>
-                            <div class="a-desc">
-                                @if (isGraded)
-                                {
-                                    <span>Đã có điểm/nhận xét.</span>
-                                }
-                                else
-                                {
-                                    <span>Đang chờ chấm.</span>
-                                }
+                <div class="alist" style="margin-top:12px;">
+
+                    <!-- File row -->
+                    <div class="a a-stretch">
+                        <div class="a-left">
+                            <div class="ico">📄</div>
+                            <div class="a-text">
+                                <div class="a-title" title="@fileName">@fileName</div>
+                                <div class="a-desc">
+                                    @if (hasFile)
+                                    {
+                                        <span class="muted">@Model.FileUrl</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">Chưa có file (hoặc FileUrl lỗi).</span>
+                                    }
+                                </div>
+
+                                <div class="meta">
+                                    <span class="tag gray">Submission #@Model.Id</span>
+                                    <span class="tag gray">Assignment #@Model.AssignmentId</span>
+                                    <span class="tag @badgeClass">@badgeText</span>
+                                    @if (graded)
+                                    {
+                                        <span class="tag ok">Score: @Model.Score</span>
+                                    }
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="meta">
-                                @if (isGraded)
-                                {
-                                    <span class="tag ok">Score: @Model.Score</span>
-                                }
-                                else
-                                {
-                                    <span class="tag warn">Pending</span>
-                                }
+                        <div class="a-right">
+                            <!-- In-page Preview toggle -->
+                            <button class="btnx primary"
+                                    type="button"
+                                    id="btnPreview"
+                                    @(hasFile ? "" : "disabled")
+                                    style="@(hasFile ? "" : "opacity:.45; cursor:not-allowed;")">
+                                Preview
+                            </button>
 
+                            <!-- Download -->
+                            <a class="btnx"
+                               href="@(hasFile? fileUrl : "javascript:void(0)")"
+                               target="_blank"
+                               style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                                Download
+                            </a>
+
+                            <div class="time">
+                                Nộp lúc: @Model.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
                                 @if (Model.GradedAt != default(DateTime))
                                 {
-                                    <span class="tag">Graded: @Model.GradedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                                    <br />
+                                    <span>Chấm: @Model.GradedAt.ToString()</span>
                                 }
                             </div>
                         </div>
                     </div>
 
-                    <div class="a-right">
-                        <div class="time">
-                            @if (Model.GradedAt != default(DateTime))
-                            {
-                                <span>Chấm lúc: @Model.GradedAt?.ToString("dd/MM/yyyy HH:mm")</span>
-                            }
-                            else
-                            {
-                                <span>—</span>
-                            }
+                    <!-- Inline viewer panel (hidden until preview) -->
+                    <div class="viewer" id="viewer">
+                        <div class="viewer-head">
+                            <div class="viewer-title">Xem trước</div>
+                            <button class="btnx" type="button" id="btnCloseViewer">Close</button>
                         </div>
-                    </div>
-                </div>
 
-                <div class="a">
-                    <div class="a-left">
-                        <div class="ico">💬</div>
-                        <div class="a-text">
-                            <div class="a-title">Nhận xét</div>
-                            <div class="a-desc" style="max-height:none;">
-                                @if (!string.IsNullOrWhiteSpace(Model.Feedback))
-                                {
-                                    <div style="line-height:1.65;">@Model.Feedback</div>
-                                }
-                                else
-                                {
-                                    <span class="muted">Chưa có nhận xét.</span>
-                                }
+                        <div class="viewer-body" id="viewerBody">
+                            <iframe class="viewer-iframe" id="viewerFrame" src="about:blank"></iframe>
+                        </div>
+
+                        <div class="viewer-msg" id="viewerMsg" style="display:none;"></div>
+                    </div>
+
+                    <!-- Feedback row -->
+                    <div class="a">
+                        <div class="a-left">
+                            <div class="ico">💬</div>
+                            <div class="a-text">
+                                <div class="a-title">Nhận xét</div>
+                                <div class="a-desc" style="max-height:none;">
+                                    @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+                                    {
+                                        <div style="line-height:1.65;">@Model.Feedback</div>
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">Chưa có nhận xét.</span>
+                                    }
+                                </div>
                             </div>
                         </div>
+
+                        <div class="a-right">
+                            <span class="tag @(string.IsNullOrWhiteSpace(Model.Feedback) ? "gray" : "ok")">
+                                @(string.IsNullOrWhiteSpace(Model.Feedback) ? "No feedback" : "Has feedback")
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="a-right">
-                        <span class="tag @(string.IsNullOrWhiteSpace(Model.Feedback) ? "gray" : "ok")">
-                            @(string.IsNullOrWhiteSpace(Model.Feedback) ? "No feedback" : "Has feedback")
-                        </span>
-                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- RIGHT: Quick actions -->
-        <div class="cardx widget">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <h3 style="margin:0; font-weight:900;">Actions</h3>
-                <span class="tag">Detail</span>
+            <!-- RIGHT -->
+            <div class="cardx widget">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;" class="mb-2">
+                    <h3 style="margin:0; font-weight:900;">Actions</h3>
+                    <span class="tag">Detail</span>
+                </div>
+
+                <a class="btnx primary mb-2"
+                   asp-area="Student"
+                   asp-controller="Submission"
+                   asp-action="Index">
+                    ← My Submissions
+                </a>
+
+                <a class="btnx"
+                   asp-area="Student"
+                   asp-controller="Assignment"
+                   asp-action="Index">
+                    ← Assignments
+                </a>
+
+                <div class="muted" style="margin-top:10px; line-height:1.5;">
+                    Tip: nếu preview lỗi, thường là file không phải PDF/ảnh — bấm Open để xem bằng app ngoài.
+                </div>
             </div>
 
-            <a class="btnx primary mb-2"
-               asp-area="Student"
-               asp-controller="Submission"
-               asp-action="Index">
-                ← My Submissions
-            </a>
-
-            <a class="btnx"
-               asp-area="Student"
-               asp-controller="Assignment"
-               asp-action="Index">
-                ← Assignments
-            </a>
-
-            <div class="muted" style="margin-top:10px; line-height:1.5;">
-                Tip: nếu file mở lỗi, báo giảng viên — thường là do đường dẫn FileUrl chưa map đúng StaticFiles.
-            </div>
         </div>
     </div>
-</div>
+
+    @if (hasFile)
+    {
+        <script>
+            (function(){
+                const url = "@fileUrl";
+                const btnPreview = document.getElementById("btnPreview");
+                const btnClose = document.getElementById("btnCloseViewer");
+                const viewer = document.getElementById("viewer");
+                const frame = document.getElementById("viewerFrame");
+                const body = document.getElementById("viewerBody");
+                const msg = document.getElementById("viewerMsg");
+
+                function extOf(u){
+                    try{
+                        const clean = u.split("?")[0].split("#")[0];
+                        const parts = clean.split(".");
+                        return (parts.length > 1 ? parts.pop().toLowerCase() : "");
+                    }catch{ return ""; }
+                }
+
+                function canIframe(ext){
+                    return ["pdf","png","jpg","jpeg","gif","webp"].includes(ext);
+                }
+
+                function openViewer(){
+                    const ext = extOf(url);
+
+                    viewer.classList.add("open");
+
+                    if (canIframe(ext)){
+                        msg.style.display = "none";
+                        body.style.display = "block";
+                        frame.src = url;
+                    } else {
+                        frame.src = "about:blank";
+                        body.style.display = "none";
+                        msg.style.display = "block";
+                        msg.innerHTML =
+                            `File loại <strong>.${ext || "unknown"}</strong> không preview tốt trong browser.<br/>
+                             Hãy dùng nút <strong>Open</strong> hoặc <strong>Download</strong>.`;
+                    }
+
+                    // nice UX: scroll viewer into view
+                    viewer.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+
+                function closeViewer(){
+                    frame.src = "about:blank";
+                    viewer.classList.remove("open");
+                }
+
+                btnPreview?.addEventListener("click", openViewer);
+                btnClose?.addEventListener("click", closeViewer);
+            })();
+        </script>
+    }
+</body>

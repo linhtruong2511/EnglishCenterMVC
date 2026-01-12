@@ -19,13 +19,15 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             {
                 var list = await submissionService.GetSubmissions();
                 return View(list);
-            } catch
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Content("Submission Index crashed: " + ex.Message);
             }
         }
-        
-        public async Task<IActionResult> Detail(int subId)
+
+
+        public async Task<IActionResult> Details(int subId)
         {
             if(subId <= 0 ) return BadRequest("Submission khong ton tai");
             try

@@ -59,14 +59,14 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             if (assignmentId <= 0) return BadRequest("Invalid assignmentId.");
             if (submissionFile == null || submissionFile.Length == 0) return BadRequest("File không tồn tại");
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(userId))
-                return Unauthorized("User not logged in / missing NameIdentifier.");
+            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //if (string.IsNullOrWhiteSpace(userId))
+            //    return Unauthorized("User not logged in / missing NameIdentifier.");
 
             try
             {
-                await submissionService.SubmitAssignment(assignmentId, "HV001", submissionFile);
-                return RedirectToAction("Index", "Submission", new { area = "Student" });
+                await submissionService.SubmitAssignment(assignmentId, "24bca244-7022-4c10-8bca-4d8a55bdefcd", submissionFile);
+                return RedirectToAction("Index", "Submission");
             }
             catch (DbUpdateException dbEx)
             {
