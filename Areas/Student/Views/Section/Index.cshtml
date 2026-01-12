@@ -1,115 +1,203 @@
-﻿@{
-    ViewData["Title"] = "Index";
+﻿@using System.Linq
+@using System
+@{
+    ViewData["Title"] = "Sections";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
-    bool openFirst = true; // nicer UX: open first section by default
+
+    bool openFirst = true;
+
+    var items = (Model ?? Enumerable.Empty<SectionVM>()).ToList();
+    var totalSections = items.Count;
+
+    var allLessons = items.SelectMany(s => s?.Lessons ?? Enumerable.Empty<LessonVM>()).ToList();
+    var totalLessons = allLessons.Count;
+    var completedLessons = allLessons.Count(l => l != null && l.IsCompleted);
+    var finishedSections = items.Count(s =>
+    {
+        var ls = (s?.Lessons ?? Enumerable.Empty<LessonVM>()).ToList();
+        return ls.Any() && ls.All(l => l != null && l.IsCompleted);
+    });
+
+    var sectionProgressPct = totalSections == 0 ? 0 : (int)Math.Round(finishedSections * 100.0 / totalSections);
+
+    var progressPct = totalLessons == 0 ? 0 : (int)Math.Round(completedLessons * 100.0 / totalLessons);
 }
 @model IEnumerable<SectionVM>
 
-<head>
+@section Styles {
     <link rel="stylesheet" href="~/css/lessons.css" />
-</head>
+}
 
-<body>
-    <div class="sec-wrap container-fluid">
+<div class="wrap">
 
-        <!-- Hero-ish header (no CSS change, just structure) -->
-        <div class="sec-head" style="gap:14px;">
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-bg" style="background-image:url('/img/hero/sections.jpg');"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
             <div style="min-width:0;">
-                <h2 style="margin:0; display:flex; align-items:center; gap:10px;">
-                    <span style="display:inline-flex; width:38px; height:38px; border-radius:14px;
-                                 border:1px solid var(--border); align-items:center; justify-content:center;">
-                        📚
-                    </span>
-                    <span>Sections</span>
-                </h2>
-
-                <div class="sub" style="margin-top:6px;">
+                <h1 class="hero-title">Sections</h1>
+                <div class="hero-sub">
                     Chọn 1 section để xem lessons và tiếp tục học.
                 </div>
 
                 <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
-                    <span class="pill">Tổng section: @(Model?.Count() ?? 0)</span>
-                    <span class="pill">Tip: mở theo thứ tự từ trên xuống</span>
+                    <span class="pill">Tổng section: @totalSections</span>
+                    <span class="pill">Hoàn thành: @finishedSections/@totalSections (@sectionProgressPct%)</span>
+                    <span class="pill">Tip: đi từ trên xuống</span>
                 </div>
             </div>
 
-        @if (Model.Count() == 0)
-        {
-            <h2 class="text-center">Rất tiếc khóa học này chưa có bài học nào!</h2>
-        }
-        else
-        {
+            <div style="display:flex; gap:10px; align-items:center; flex:0 0 auto;">
+                <a class="btnx" asp-area="Student" asp-controller="Courses" asp-action="Index">← Back</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="grid">
+
+        <!-- LEFT: Sections accordion -->
+        <div class="cardx">
             <div class="panel">
-                @{
-                    int idx = 0;
-                }
-
-                @foreach (var s in Model)
+                @if (!items.Any())
                 {
-                    idx++;
+                    <div class="lesson-row" style="color:var(--muted); padding:14px;">
+                        Rất tiếc, khóa học này chưa có section/lesson nào.
+                    </div>
+                }
+                else
+                {
+                    var idx = 0;
 
-                    var lessons = s.Lessons;
-                    var total = lessons.Count;
-
-                    var completed = 0;
-                    int totalMinutes = 0;
-                    foreach (var l in lessons)
+                    foreach (var s in items)
                     {
-                        if (l.IsCompleted) completed++;
-                    }
+                        idx++;
 
-                    <details class="section" @(openFirst && idx == 1 ? "open" : "")>
-                        <summary class="">
-                            <div class="d-flex align-content-center justify-content-between ">
-                                <div style="min-width:0;">
-                                    <div class="sec-title">@s.Name</div>
-                                    <div class="sec-meta">
-                                        <span class="text-muted">@s.Description</span>
-                                        <span>•</span>
-                                        <span>@completed/@total</span>
+                        var lessons = (s?.Lessons ?? new List<LessonVM>()).OrderBy(x => x.Order).ToList();
+                        var total = lessons.Count;
+                        var completed = lessons.Count(l => l != null && l.IsCompleted);
+
+                        // Status pill for section
+                        var statusText =
+                        total == 0 ? "Empty" :
+                        completed == total ? "Done" :
+                        completed > 0 ? "In progress" : "Ready";
+
+                        var statusClass =
+                        total == 0 ? "gray" :
+                        completed == total ? "ok" :
+                        completed > 0 ? "warn" : "ok";
+                        <details class="section" @(openFirst && idx == 1 ? "open" : "")>
+                            <summary class="sec-summary">
+                                <!-- LEFT block -->
+                                <div class="sec-left" style="flex:1 1 auto;">
+                                    <div style="min-width:0;">
+                                        <div class="sec-title" title="@s.Name">@s.Name</div>
+
+                                        <div class="sec-meta">
+                                            @if (!string.IsNullOrWhiteSpace(s.Description))
+                                            {
+                                                <span>@s.Description</span>
+                                                <span>•</span>
+                                            }
+                                            <span>@completed/@total lessons</span>
+                                            <span>•</span>
+                                            <span>Section #@s.Id</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="chev">˅</div>
-                            </div>
-                        </summary>
-
-                        <div class="lessons">
-                            @if (!lessons.Any())
-                            {
-                                <div class="lesson-row" style="color: var(--muted);">
-                                    No lessons in this section yet.
+                                <!-- RIGHT block (hard-right) -->
+                                <div style="display:flex; align-items:center; gap:10px; flex:0 0 auto;">
+                                    <span class="tag @statusClass">@statusText</span>
+                                    <div class="chev">˅</div>
                                 </div>
-                            }
-                            else
-                            {
-                                foreach (var l in lessons.OrderBy(x => x.Order))
+                            </summary>
+
+                            <div class="lessons">
+                                @if (!lessons.Any())
                                 {
-                                    var lessonName = l.Title ?? $"Lesson {l.Id}";
-                                    var durationText = "— phút";
-
-                                    <div class="lesson-row">
-                                        <div class="l-left">
-                                            <i class="bx bx-folder"></i>
-                                            <div class="l-text">
-                                                <div class="l-name" title="@lessonName">@lessonName</div>
-                                                <div class="l-sub">@durationText</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="l-right">
-                                            <input class="check" @(l.IsCompleted ? "checked" : "") type="checkbox" title="Mark completed" disabled/>
-
-                                            <a class="open-btn" asp-area="Student" asp-controller="Lesson" asp-action="Index" asp-route-id="@l.Id"> Open </a>
-                                        </div>
+                                    <div class="lesson-row" style="color:var(--muted);">
+                                        No lessons in this section yet.
                                     </div>
                                 }
-                            }
-                        </div>
-                    </details>
+                                else
+                                {
+                                    foreach (var l in lessons)
+                                    {
+                                        var lessonName = l.Title ?? $"Lesson {l.Id}";
+                                        var durationText = "— phút"; // keep placeholder, wire later
+                                                                     <div class="lesson-row">
+                                                                         <div class="l-left">
+                                                                             <div class="l-ico">⌁</div>
+
+                                                <div class="l-text">
+                                                    <div class="l-name" title="@lessonName">@lessonName</div>
+                                                    <div class="l-sub">
+                                                        <span>@durationText</span>
+                                                        <span class="dot"></span>
+                                                        <span class="muted">Lesson #@l.Id</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="l-right">
+                                                <input class="check" type="checkbox" disabled @(l.IsCompleted ? "checked" : "") />
+                                                <a class="open-btn"
+                                                   asp-area="Student"
+                                                   asp-controller="Lesson"
+                                                   asp-action="Index"
+                                                   asp-route-id="@l.Id">
+                                                    Open
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </details>
+                    }
                 }
             </div>
+        </div>
 
-        }
+        <!-- RIGHT: Sidebar (quick stats + actions) -->
+        <div class="cardx side">
+            <h4>Tổng quan</h4>
+
+            <div class="rowx">
+                <span class="muted">Sections</span>
+                <strong>@totalSections</strong>
+            </div>
+            <div class="rowx">
+                <span class="muted">Lessons</span>
+                <strong>@totalLessons</strong>
+            </div>
+            <div class="rowx">
+                <span class="muted">Completed</span>
+                <strong>@completedLessons</strong>
+            </div>
+
+            <a class="btnx primary"
+               asp-area="Student"
+               asp-controller="Courses"
+               asp-action="Index">
+                Back to Courses
+            </a>
+
+            <a class="btnx"
+               asp-area="Student"
+               asp-controller="Home"
+               asp-action="Index">
+                Dashboard
+            </a>
+
+            <div class="muted" style="margin-top:10px; line-height:1.5;">
+                Tip: mở section nào có “In progress” trước — tối ưu hóa pipeline học tập. 🙂
+            </div>
+        </div>
+
     </div>
-</body>
+</div>
