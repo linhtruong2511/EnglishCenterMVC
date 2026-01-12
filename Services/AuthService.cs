@@ -13,6 +13,7 @@ namespace EnglishCenterMVC.Services
     public class AuthService : IAuthService
     {
         private UserManager<User> userManager;
+        private SignInManager<User> signInManager;
         private readonly IConfiguration _config;
         private IHttpContextAccessor http;
         private IFileService fileService;
@@ -20,12 +21,14 @@ namespace EnglishCenterMVC.Services
         public AuthService(UserManager<User> userManager,
             IConfiguration config,
             IHttpContextAccessor http,
-            IFileService fileService)
+            IFileService fileService,
+            SignInManager<User> signInManager)
         {
             this.userManager = userManager;
             _config = config;
             this.http = http;
             this.fileService = fileService;
+            this.signInManager = signInManager;
         }
 
         async Task<User> IAuthService.GetUser(string id)
@@ -54,34 +57,21 @@ namespace EnglishCenterMVC.Services
         async Task<LoginResponse> IAuthService.Login(string email, string password)
         {
             var user = await userManager.FindByEmailAsync(email);
-            if (user is null || !await userManager.CheckPasswordAsync(user, password))
+            if (user is null)
+                throw new UnauthorizedAccessException("Thông tin đăng nhập không chính xác");
+
+            var result = await signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
+
+            if (result.IsLockedOut)
+                throw new Exception("Tài khoản đã bị khóa do nhập sai nhiều lần.");
+
+            if (!result.Succeeded)
                 throw new UnauthorizedAccessException("Thông tin đăng nhập không chính xác");
 
             var roles = await userManager.GetRolesAsync(user);
 
-            var claims = new List<Claim>
+            return new LoginResponse
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email!)
-            };
-
-            claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
-            );
-
-            var token = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(_config["Jwt:ExpireMinutes"]!)
-                ),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-            ));
-
-            return new LoginResponse { 
                 User = new UserResponseDto
                 {
                     Id = user.Id,
@@ -91,13 +81,13 @@ namespace EnglishCenterMVC.Services
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber
                 },
-                Token = token
+                Roles = roles,
             };
         }
 
-        async Task IAuthService.Logout()
+        async Task IAuthService.Logout(ClaimsPrincipal user)
         {
-            throw new NotImplementedException("Chưa triển khai");
+            await signInManager.SignOutAsync();
         }
 
         async Task<User> IAuthService.Register(UserRegisterDto dto)

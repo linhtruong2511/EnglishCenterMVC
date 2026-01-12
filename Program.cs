@@ -24,6 +24,7 @@ builder.Services.AddScoped<ILessonService, LessonService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+builder.Services.AddScoped<IClassesService, ClassesService>();
 
 // Identity
 builder.Services.AddIdentity<User, IdentityRole>()

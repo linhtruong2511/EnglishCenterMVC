@@ -1,0 +1,59 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model Classes
+
+<div class="card">
+    <div class="card-header">
+        <h5>Thêm học viên vào lớp: @Model.Name</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="ConfirmAddStudent" asp-controller="Classes" method="post">
+            <input type="hidden" name="classId" value="@Model.Id" />
+
+            <div class="form-group mb-3">
+                <label class="form-label">Chọn học viên</label>
+                <select name="studentId" class="form-select select2" asp-items="ViewBag.Students">
+                    <option value="">-- Tìm kiếm tên học viên --</option>
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Xác nhận thêm</button>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Users)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Email</td>
+                        <td>
+                            <form asp-controller="Classes" asp-action="ConfirmRemoveStudent" >
+                                <input type="hidden" name="classId" value="@Model.Id"/>
+                                <input type="hidden" name="studentId" value="@item.Id"/>
+                                <button class="btn btn-outline-danger">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -11,7 +11,7 @@ namespace EnglishCenterMVC.Services
         Task<User> Register(UserRegisterDto user);
         Task<User> ChangePassword(User user, string newPassword, string currentPassword);
         Task ForgotPassword(string email);
-        Task Logout();
+        Task Logout(ClaimsPrincipal user);
         Task<User> GetUser(string id);
         Task<User> GetUser(ClaimsPrincipal user);
         Task<User> UploadAvatar(ClaimsPrincipal user, IFormFile file);

@@ -38,6 +38,15 @@ namespace EnglishCenterMVC.Services
             }
         }
 
+        async Task<IEnumerable<Course>> ICourseService.GetByUserId(string userId)
+        {
+            return await context.Classes
+                .Where(c => c.Users.Any(u => u.Id == userId))
+                .Select(c => c.Course)
+                .Distinct()
+                .ToListAsync();
+        }
+
         async Task<Course> ICourseService.GetCourseById(int id)
         {
             var course = await context.Courses

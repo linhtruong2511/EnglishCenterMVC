@@ -5,6 +5,7 @@ namespace EnglishCenterMVC.Services
     public interface ICourseService
     {
         Task<IEnumerable<Course>> GetCourses(string? name = "");
+        Task<IEnumerable<Course>> GetByUserId(string userId);
         Task<Course> GetCourseById(int id);
         Task<Course> AddCourse(Course course);
         Task<Course> UpdateCourse(int id, Course course);
