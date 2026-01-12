@@ -11,5 +11,8 @@ namespace EnglishCenterMVC.Services
         Task<Lesson> AddLessonAsync(LessonCreateDto lesson);
         Task<Lesson> UpdateLessonAsync(int id, LessonUpdateDto lesson);
         Task DeleteLessonAsync(int id);
+        Task<Lesson> MarkCompleted(int lessonId, string userId);
+        Task<bool> IsCompletedAsync(int lessonId, string userId);
+        bool IsCompleted(int lessonId, string userId);
     }
 }

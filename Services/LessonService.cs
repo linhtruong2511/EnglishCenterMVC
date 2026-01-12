@@ -30,6 +30,7 @@ namespace EnglishCenterMVC.Services
         public async Task<Lesson> GetLessonAsync(int id)
         {
             var lesson = await _context.Lessons
+                .Include(l => l.LessonProgresses)
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (lesson == null)
@@ -120,6 +121,42 @@ namespace EnglishCenterMVC.Services
                 .Include(l => l.Section)
                 .OrderBy(l => l.Section.Order)
                 .ToListAsync();
+        }
+
+        public async Task<Lesson> MarkCompleted(int lessonId, string userId)
+        {
+            try
+            {
+                var lessonProgress = new LessonProgress
+                {
+                    IsCompleted = true,
+                    UserId = userId,
+                    LessonId = lessonId,
+                    CompletedAt = DateTime.Now
+                };
+
+                await _context.LessonProgresses.AddAsync(lessonProgress);
+                _context.SaveChanges();
+                return await _context.Lessons.FindAsync(lessonId);
+            } catch (Exception ex)
+            {
+                return null;
+            }
+        }
+        public async Task<bool> IsCompletedAsync(int lessonId, string userId)
+        {
+            var lessonProgress = await _context.LessonProgresses
+                .FirstOrDefaultAsync(l => l.LessonId == lessonId && l.UserId == userId);
+
+            return lessonProgress is not null && lessonProgress.IsCompleted;
+        }
+
+        public bool IsCompleted(int lessonId, string userId)
+        {
+            var lessonProgress =  _context.LessonProgresses
+                .FirstOrDefault(l => l.LessonId == lessonId && l.UserId == userId);
+
+            return lessonProgress is not null && lessonProgress.IsCompleted;
         }
     }
 }

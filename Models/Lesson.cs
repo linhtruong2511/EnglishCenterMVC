@@ -20,5 +20,6 @@ namespace EnglishCenterMVC.Models
         public int SectionId { get; set; }
         [JsonIgnore]
         public Section Section { get; set; }
+        public ICollection<LessonProgress> LessonProgresses { get; set; }
     }
 }

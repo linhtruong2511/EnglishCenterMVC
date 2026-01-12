@@ -135,9 +135,9 @@
 
 
                     <li class="menu-item">
-                        <form asp-controller="Auth" asp-area="" asp-action="Logout" id="logout" method="post" class="menu-link">
+                        <form asp-controller="Auth" asp-area="" asp-action="Logout" id="logout" method="post" class="menu-link" onclick="this.submit()">
                             <i class="menu-icon tf-icons bx bx-log-out"></i>
-                            <a data-i18n="Analytics" onclick="document.getElementById('logout').submit()">
+                            <a data-i18n="Analytics" >
                                 Đăng xuất
                             </a>
                         </form>

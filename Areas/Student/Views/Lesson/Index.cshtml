@@ -1,4 +1,4 @@
-﻿@model EnglishCenterMVC.Models.Lesson
+﻿@model LessonVM
 @{
     ViewData["Title"] = Model?.Title ?? "Lesson";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
@@ -114,8 +114,19 @@
                     Continue Course
                 </a>
 
-                @* Later you can wire this to progress tracking *@
-                <a class="btnx" href="javascript:void(0)">Mark as Completed</a>
+                <form asp-controller="Lesson" asp-action="MarkCompleted" method="post" asp-route-lessonId="@Model.Id">
+                    <button type="submit" class="btn btn-outline-primary btnx" @(Model.IsCompleted ? "disabled" : "")>
+                        @if (Model.IsCompleted)
+                        {
+                            <span>Is Completed</span>
+                        }
+                        else
+                        {
+                            <span>Mark as Completed</span>
+                        }
+                    </button>
+                </form>
+
             </div>
         </div>
     </div>

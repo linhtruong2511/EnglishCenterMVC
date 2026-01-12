@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EnglishCenterMVC.Services;
+using EnglishCenterMVC.Areas.Student.Models;
+using System.Security.Claims;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
@@ -18,11 +20,27 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         public async Task<IActionResult> Index(int courseid)
         {
             var sections = await sectionService.GetSectionsAsync(courseid);
-            if (sections.Count() <= 0)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            List<SectionVM> vms = new List<SectionVM>();
+            foreach (var item in sections)
             {
-                return NotFound();
+                vms.Add(new SectionVM
+                {
+                    Name = item.Name,
+                    Course = item.Course,
+                    Description = item.Description,
+                    Id = item.Id,
+                    Order = item.Order,
+                    Lessons = item.Lessons.Select(l => new LessonVM
+                    {
+                        Id = l.Id,
+                        Title = l.Title,
+                        IsCompleted = lessonService.IsCompleted(l.Id, userId)
+                    }).ToList()
+                });
             }
-            return View(sections);
+
+            return View(vms);
         }
 
         public async Task<IActionResult> Lesson(int sectionid)
