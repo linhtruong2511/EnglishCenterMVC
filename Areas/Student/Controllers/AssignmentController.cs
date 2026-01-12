@@ -28,6 +28,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
                 var availableAssignments = await assignmentService.GetAssignmentsAsync();
                 var overdueAssignments = await assignmentService.GetOverdueAssignmentsAsync();
                 var newlyUploaded = availableAssignments.Where(a => (DateTime.Now - a.CreateAt).TotalDays <= 3).Count();
+                
                 return View(new AssignmentVM
                 {
                     Available = availableAssignments.Count(),
@@ -61,13 +62,13 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             if (assignmentId <= 0) return BadRequest("Invalid assignmentId.");
             if (submissionFile == null || submissionFile.Length == 0) return BadRequest("File không tồn tại");
 
-            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //if (string.IsNullOrWhiteSpace(userId))
-            //    return Unauthorized("User not logged in / missing NameIdentifier.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized("User not logged in / missing NameIdentifier.");
 
             try
             {
-                await submissionService.SubmitAssignment(assignmentId, "24bca244-7022-4c10-8bca-4d8a55bdefcd", submissionFile);
+                await submissionService.SubmitAssignment(assignmentId, userId, submissionFile);
                 return RedirectToAction("Index", "Submission");
             }
             catch (DbUpdateException dbEx)

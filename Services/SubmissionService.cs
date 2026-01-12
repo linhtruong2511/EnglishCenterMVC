@@ -67,7 +67,7 @@ namespace EnglishCenterMVC.Services
                 SubmittedAt = DateTime.Now,
                 Score = 0
             };
-
+            assignment.IsSubmit = true;
             context.Submissions.Add(submission);
             await context.SaveChangesAsync();
 

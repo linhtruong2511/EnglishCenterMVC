@@ -125,6 +125,7 @@ namespace EnglishCenterMVC.Services
             entity.TypeSubmit = assignment.SubmitType;
             entity.Deadline = assignment.Deadline;
             entity.UpdateAt = DateTime.Now;
+            entity.AllowResubmit = assignment.AllowResubmit;
 
             if (assignment.File != null)
             {

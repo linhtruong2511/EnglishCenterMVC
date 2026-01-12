@@ -12,5 +12,6 @@ namespace EnglishCenterMVC.Areas.Admin.Models
         public IFormFile? File { get; set; }
         public DateTime Deadline { get; set; }
         public int CourseId {  get; set; }
+        public bool AllowResubmit { get; set; }
     }
 }
