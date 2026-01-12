@@ -48,7 +48,7 @@ namespace EnglishCenterMVC.Services
             return entity;
         }
 
-        async Task<Assignment> IAssignmentService.DeleteAssignmentAsync(int id)
+        async Task<Assignment> IAssignmentService.DeleteAssignmentAsync(int id) 
         {
             var entity = await context.Assignments.FindAsync(id);
             if (entity == null)
@@ -71,6 +71,15 @@ namespace EnglishCenterMVC.Services
                 .OrderByDescending(x => x.CreateAt)
                 .ToListAsync();
         }
+
+        async Task<IEnumerable<Assignment>> IAssignmentService.GetAllAsync()
+        {
+            return await context.Assignments
+                .Include(a => a.Course)
+                .OrderByDescending(x => x.CreateAt)
+                .ToListAsync();
+        }
+        
 
         async Task<IEnumerable<Assignment>> IAssignmentService.GetOverdueAssignmentsAsync()
         {

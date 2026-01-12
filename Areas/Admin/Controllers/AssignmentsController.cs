@@ -21,7 +21,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var assignments = await assignmentService.GetAssignmentsAsync();
+            var assignments = await assignmentService.GetAllAsync();
             return View(assignments);
         }
 
