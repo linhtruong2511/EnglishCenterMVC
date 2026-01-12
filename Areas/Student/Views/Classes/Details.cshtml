@@ -1,56 +1,276 @@
 ﻿@model EnglishCenterMVC.Models.Classes
+@using System
+@using System.Linq
+@using System.Collections.Generic
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Class Details";
+    Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+
+    var now = DateTime.Now;
+    var start = Model?.StartDate ?? now;
+    var end = Model?.EndDate ?? now;
+
+    var phase =
+        (end < now) ? "Ended" :
+        (start > now) ? "Upcoming" : "Running";
+
+    string PhasePill(string p) => p switch
+    {
+        "Running" => "ok",
+        "Upcoming" => "warn",
+        _ => "gray"
+    };
+
+    int DaysToStart() => (int)Math.Ceiling((start - now).TotalDays);
+    int DaysToEnd() => (int)Math.Ceiling((end - now).TotalDays);
+
+    // --- Fake leaderboard that respects MaxStudent ---
+    // Rules:
+    // 1) Always include "You"
+    // 2) Total rows = min(MaxStudent, pool size) but never > MaxStudent
+    // 3) If MaxStudent is 0/null -> show a safe default (e.g., 6)
+    // 4) No duplicates
+
+    int maxStudents = Math.Max(Model?.MaxStudent ?? 0, 0);
+    int takeCount = (maxStudents == 0) ? 6 : maxStudents; // fallback if MaxStudent not set
+
+    // A bigger pool than you'll ever show (so it can scale)
+    var pool = new List<dynamic> {
+        new { Name="You",         Score=780, Streak=12, Delta="—" },
+
+        new { Name="Clara Diaz",  Score=812, Streak=19, Delta="↑" },
+        new { Name="Mina Tran",   Score=744, Streak=10, Delta="↓" },
+        new { Name="Gary Carter", Score=701, Streak=8,  Delta="↑" },
+        new { Name="An Luu",      Score=669, Streak=6,  Delta="—" },
+        new { Name="Zane G.",     Score=640, Streak=5,  Delta="↓" },
+
+        new { Name="Linh Pham",   Score=622, Streak=7,  Delta="↑" },
+        new { Name="Huy Nguyen",  Score=610, Streak=4,  Delta="—" },
+        new { Name="Quang Do",    Score=598, Streak=9,  Delta="↑" },
+        new { Name="Mai Le",      Score=585, Streak=3,  Delta="↓" },
+        new { Name="Khanh Tran",  Score=572, Streak=6,  Delta="—" },
+        new { Name="Nora Vo",     Score=560, Streak=2,  Delta="↓" },
+        new { Name="Tuan Bui",    Score=548, Streak=5,  Delta="↑" },
+        new { Name="Vy Dang",     Score=533, Streak=8,  Delta="—" },
+        new { Name="Duc Hoang",   Score=520, Streak=1,  Delta="↓" },
+        new { Name="Trang Phan",  Score=507, Streak=4,  Delta="↑" },
+        new { Name="Bao Chau",    Score=495, Streak=3,  Delta="—" },
+        new { Name="Nam Le",      Score=482, Streak=2,  Delta="↓" },
+    };
+
+    // Build the final list: keep "You", then fill up to takeCount with others
+    var you = pool.FirstOrDefault(x => (string)x.Name == "You");
+    var others = pool.Where(x => (string)x.Name != "You").ToList();
+
+    // If MaxStudent is 1, only show You.
+    // If takeCount > pool size, show as many as exist.
+    var classmates = new List<dynamic>();
+    if (you != null) classmates.Add(you);
+
+    int remaining = Math.Max(takeCount - classmates.Count, 0);
+    classmates.AddRange(others.Take(remaining));
+
+    // Ensure "You" highlight lookup still works
+    int youIndex = classmates.FindIndex(x => (string)x.Name == "You");
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/ass.css" />
+    <link rel="stylesheet" href="~/css/display.css" />
+}
 
-<h1>Details</h1>
+<div class="course-wrap container-fluid">
 
-<div>
-    <h4>Classes</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaxStudent)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaxStudent)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Course)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Course.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ClassStatus)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ClassStatus)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <!-- HERO -->
+    <div class="cardx course-hero">
+        <div class="course-hero-inner" style="align-items:flex-end;">
+
+            <div class="course-hero-left">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span class="tag">Student Area</span>
+                    <span class="tag gray">Class Details</span>
+                    <span class="tag @PhasePill(phase)">@phase</span>
+                </div>
+
+                <h2 class="course-hero-title" style="margin-top:10px;">
+                    @(Model?.Name ?? "Class")
+                </h2>
+
+                <div class="muted course-hero-sub" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+                    <span>Max students: <strong>@(Model?.MaxStudent ?? 0)</strong></span>
+                    <span>•</span>
+                    <span>Course: <strong>@(Model?.Course?.Name ?? $"#{Model?.Course?.Id}")</strong></span>
+                    <span>•</span>
+                    <span>@start.ToString("dd/MM/yyyy") → @end.ToString("dd/MM/yyyy")</span>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                    @if (phase == "Upcoming")
+                    {
+                        <span class="pill warn">Starts in @Math.Max(DaysToStart(), 0)d</span>
+                    }
+                    else if (phase == "Running")
+                    {
+                        <span class="pill ok">Ends in @Math.Max(DaysToEnd(), 0)d</span>
+                    }
+                    else
+                    {
+                        <span class="pill gray">Archived</span>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model?.ClassStatus.ToString()))
+                    {
+                        <span class="pill">@Model.ClassStatus</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Right side: action strip -->
+            <div class="course-hero-right" style="display:flex; flex-direction:column; gap:10px; min-width:280px;">
+                <a class="btnx primary" asp-action="Index">Back to Classes</a>
+
+                <div class="cardx" style="padding:12px; box-shadow:none;">
+                    <div class="muted" style="font-weight:900;">Quick actions</div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <a class="btnx" asp-action="Edit" asp-route-id="@Model?.Id" style="flex:1;">Edit</a>
+                        <a class="btnx" asp-controller="Courses" asp-action="Index" style="flex:1;">Courses</a>
+                    </div>
+                    <div class="muted" style="margin-top:10px; line-height:1.5;">
+                        Tip: “Consistency” is just discipline with better branding.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid" style="margin-top:14px; grid-template-columns: 1.6fr 1fr;">
+        <!-- LEFT: Details card (clean, not the <dl> tax) -->
+        <div class="cardx card-pad" style="padding:16px;">
+            <div class="hrow">
+                <h3>Class overview</h3>
+                <div class="muted">Everything you actually need, no museum labels.</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+                <div style="border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div class="muted" style="font-weight:900;">Name</div>
+                    <div style="font-weight:950; margin-top:6px;">@Model?.Name</div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div class="muted" style="font-weight:900;">Max students</div>
+                    <div style="font-weight:950; margin-top:6px;">@Model?.MaxStudent</div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div class="muted" style="font-weight:900;">Start date</div>
+                    <div style="font-weight:950; margin-top:6px;">@start.ToString("dd/MM/yyyy")</div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div class="muted" style="font-weight:900;">End date</div>
+                    <div style="font-weight:950; margin-top:6px;">@end.ToString("dd/MM/yyyy")</div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div class="muted" style="font-weight:900;">Course</div>
+                    <div style="font-weight:950; margin-top:6px;">
+                        @(Model?.Course?.Name ?? $"Course #{Model?.Course?.Id}")
+                    </div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div class="muted" style="font-weight:900;">Status</div>
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                        <span class="tag @PhasePill(phase)">@phase</span>
+                        @if (!string.IsNullOrWhiteSpace(Model?.ClassStatus.ToString()))
+                        {
+                            <span class="tag">@Model.ClassStatus</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border:none; border-top:1px solid rgba(0,0,0,.08); margin:14px 0;" />
+
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                <div>
+                    <h3 style="margin:0;">Class rules (totally real)</h3>
+                    <div class="muted" style="margin-top:6px;">A gentle SLA for learning.</div>
+                </div>
+                <span class="tag">v1.0</span>
+            </div>
+
+            <ul style="margin:12px 0 0; padding-left:18px; line-height:1.8;">
+                <li>Show up. Do the reps. Don’t negotiate with your future self.</li>
+                <li>Streaks are fragile — protect them like production uptime.</li>
+                <li>If you miss a day, you’re not failing. You’re just… buffering.</li>
+            </ul>
+        </div>
+
+        <!-- RIGHT: Leaderboard -->
+        <div class="cardx widget" style="padding:16px;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                <div>
+                    <h3 style="margin:0; font-weight:900;">Leaderboard</h3>
+                    <div class="muted" style="margin-top:6px;">“Student Credit Score” (™ totally not HR).</div>
+                </div>
+                <span class="tag">This week</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+                @{
+                    int rank = 0;
+                }
+                @foreach (var u in classmates.OrderByDescending(x => (int)x.Score))
+                {
+                    rank++;
+                    bool isYou = ((string)u.Name == "You");
+
+                    <div style="border:1px solid var(--border);
+                                    border-radius:14px;
+                                    padding:10px;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:space-between;
+                                    gap:10px;
+                                    @(isYou ? "background:rgba(59,130,246,.06); outline:2px solid rgba(59,130,246,.18);" : "")">
+
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                            <div style="width:34px; height:34px; border-radius:12px;
+                                            border:1px solid var(--border);
+                                            display:flex; align-items:center; justify-content:center;
+                                            font-weight:950;">
+                                @rank
+                            </div>
+
+                            <div style="min-width:0;">
+                                <div style="font-weight:950; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    @u.Name
+                                </div>
+                                <div class="muted" style="margin-top:2px;">
+                                    🔥 @u.Streak day streak
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:8px; flex:0 0 auto;">
+                            <span class="tag @(isYou ? "ok" : "gray")">@u.Score</span>
+                            <span class="tag">@u.Delta</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="muted" style="margin-top:12px; line-height:1.55;">
+                Pro tip: The fastest way up the board is boring routine. Legacy tech, but it works.
+            </div>
+
+            <a class="btnx" asp-controller="Assignment" asp-action="Index" style="margin-top:10px;">
+                Go grind assignments
+            </a>
+        </div>
+    </div>
 </div>
