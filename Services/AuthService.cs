@@ -67,19 +67,6 @@ namespace EnglishCenterMVC.Services
 
             claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
-            );
-
-            var token = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(_config["Jwt:ExpireMinutes"]!)
-                ),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-            ));
 
             return new LoginResponse { 
                 User = new UserResponseDto
@@ -91,7 +78,7 @@ namespace EnglishCenterMVC.Services
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber
                 },
-                Token = token
+                Roles = roles,
             };
         }
 

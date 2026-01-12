@@ -46,6 +46,30 @@ namespace EnglishCenterMVC.Data
             {
                 await userManager.AddToRoleAsync(adminUser, Roles.ADMIN.ToString());
             }
+
+            var studentEmail = "student@englishcenter.com";
+            var studentPassword = "Student@123";
+            var studentUser = await userManager.FindByEmailAsync(studentEmail);
+            if (studentUser is null)
+            {
+                studentUser = new User
+                {
+                    UserName = studentEmail,
+                    Email = studentEmail,
+                    EmailConfirmed = true,
+                };
+
+                var result = await userManager.CreateAsync (studentUser, studentPassword);
+                if (!result.Succeeded)
+                {
+                    throw new Exception(string.Join(", ", result.Errors.Select(_ => _.Description)));
+                }
+            }
+
+            if (!await userManager.IsInRoleAsync(studentUser, Roles.STUDENT.ToString()))
+            {
+                await userManager.AddToRoleAsync(studentUser, Roles.STUDENT.ToString());
+            }
         }
     }
 }
