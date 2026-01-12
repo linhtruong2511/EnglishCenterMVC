@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
-
     var now = DateTime.Now;
 
     var courses = ViewBag.Courses as IEnumerable<EnglishCenterMVC.Models.Course>
@@ -15,6 +14,27 @@
     var submissions = ViewBag.Submissions as IEnumerable<EnglishCenterMVC.Models.Submission>
                       ?? Enumerable.Empty<EnglishCenterMVC.Models.Submission>();
 
+    // --- XP / Progress (client-friendly, can be swapped to real progress later) ---
+    // If your Course model already has ProgressPct / CompletionPct, replace the fallback logic.
+    int Clamp(int v, int lo, int hi) => Math.Min(Math.Max(v, lo), hi);
+
+    // DEMO: deterministic pseudo-progress per course (stable across refresh)
+    int FakeProgressForCourse(int courseId)
+    {
+        // 18..96% stable-ish based on courseId
+        var raw = (courseId * 17 + 23) % 79;   // 0..78
+        return 18 + raw;                       // 18..96
+    }
+
+    var courseProgress = courses.Select(c => new
+    {
+        Course = c,
+        Pct = Clamp(FakeProgressForCourse(c.Id), 0, 100)
+    }).ToList();
+
+    var avgProgress = courseProgress.Any()
+        ? (int)Math.Round(courseProgress.Average(x => x.Pct))
+        : 0;
     // Only alive assignments
     var liveAssignments = assignments
         .Where(a => a != null && !a.IsDeleted)
@@ -179,6 +199,73 @@
             <div class="muted" style="margin-top:4px;">Theo dõi chấm điểm</div>
         </div>
     </div>
+    <!-- XP / Progress card -->
+    <div class="cardx" style="padding:14px; margin-top:14px;">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+            <div>
+                <h5 style="margin:0; font-weight:900;">Progress (XP)</h5>
+                <div class="muted" style="margin-top:4px;">Tiến độ hoàn thành theo từng khóa • nhìn cái là biết đang “đi tới đâu”.</div>
+            </div>
+
+            <div style="text-align:right;">
+                <div class="muted" style="font-weight:800;">Average</div>
+                <div style="font-weight:950; font-size:1.2rem;">@avgProgress%</div>
+            </div>
+        </div>
+
+        <div style="margin-top:12px; border:1px solid var(--border); border-radius:14px; padding:12px;">
+            <!-- overall bar -->
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="font-weight:900;">Overall</div>
+                <div class="muted">@avgProgress%</div>
+            </div>
+            <div style="height:10px; border-radius:999px; background:rgba(0,0,0,.06); overflow:hidden; margin-top:8px;">
+                <div style="height:100%; width:@avgProgress%; background:var(--brand);"></div>
+            </div>
+        </div>
+
+        <!-- per-course bars -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+            @if (!courseProgress.Any())
+            {
+                <div class="muted">Chưa có khóa học để hiển thị tiến độ.</div>
+            }
+            else
+            {
+                foreach (var x in courseProgress.OrderByDescending(z => z.Pct).Take(6))
+                {
+                    var name = x.Course?.Name ?? $"Course #{x.Course?.Id}";
+                    var pct = x.Pct;
+
+                    <div style="border:1px solid var(--border); border-radius:14px; padding:10px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="min-width:0;">
+                                <div style="font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="@name">
+                                    @name
+                                </div>
+                                <div class="muted" style="margin-top:2px;">Mốc hoàn thành (demo) • chuẩn hóa sau bằng dữ liệu thật</div>
+                            </div>
+
+                            <div style="display:flex; align-items:center; gap:10px; flex:0 0 auto;">
+                                <span class="tag @(pct >= 80 ? "ok" : (pct >= 45 ? "warn" : "danger"))">@pct%</span>
+                                <a asp-area="Student" asp-controller="Section" asp-action="Index" asp-route-courseId="@x.Course.Id"
+                                   class="btnx" style="padding:7px 10px;">Open</a>
+                            </div>
+                        </div>
+
+                        <div style="height:10px; border-radius:999px; background:rgba(0,0,0,.06); overflow:hidden; margin-top:10px;">
+                            <div style="height:100%; width:@pct%; background:var(--brand);"></div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="muted" style="margin-top:10px; line-height:1.5;">
+            Tip: Sau này nối dữ liệu thật (lessons completed / total) thì card này thành “single source of truth” cho tiến độ.
+        </div>
+    </div>
+
 
     <!-- Option A row -->
     <div class="dash-row"
