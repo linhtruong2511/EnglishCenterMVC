@@ -5,168 +5,172 @@
     ViewData["Title"] = "My Submissions";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
 
+    var now = DateTime.Now;
+
     var list = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Submission>())
         .OrderByDescending(x => x.SubmittedAt)
         .ToList();
 
-    string StatusLabel(EnglishCenterMVC.Models.Submission s)
-    {
-        // If your GradedAt is non-nullable in DB, treat default(DateTime) as "not graded"
-        var graded = s.GradedAt != default(DateTime) || s.Score > 0 || !string.IsNullOrWhiteSpace(s.Feedback);
-        return graded ? "Graded" : "Pending";
-    }
+    bool IsGraded(EnglishCenterMVC.Models.Submission s)
+        => s != null
+           && (s.GradedAt != default(DateTime)
+               || s.Score > 0
+               || !string.IsNullOrWhiteSpace(s.Feedback));
 
-    string StatusClass(EnglishCenterMVC.Models.Submission s)
-    {
-        var graded = s.GradedAt != default(DateTime) || s.Score > 0 || !string.IsNullOrWhiteSpace(s.Feedback);
-        return graded ? "ok" : "warn";
-    }
+    string StatusLabel(EnglishCenterMVC.Models.Submission s) => IsGraded(s) ? "Graded" : "Pending";
+    string StatusClass(EnglishCenterMVC.Models.Submission s) => IsGraded(s) ? "ok" : "warn";
+
+    var gradedCount = list.Count(IsGraded);
+    var pendingCount = list.Count - gradedCount;
 }
 
 <head>
     <link rel="stylesheet" href="~/css/ass.css" />
 </head>
-
-<div class="wrap">
-
-    <!-- Hero -->
-    <div class="hero">
-        <div class="hero-inner">
-            <div>
-                <div class="hero-title">My Submissions</div>
-                <div class="hero-sub">Theo dõi bài đã nộp, điểm và nhận xét (nếu đã chấm).</div>
-                <div class="pillrow">
-                    <span class="pill">Tổng: @list.Count</span>
-                    <span class="pill">Đã chấm: @list.Count(x => x.GradedAt != default(DateTime) || x.Score > 0 || !string.IsNullOrWhiteSpace(x.Feedback))</span>
-                    <span class="pill">Chờ chấm: @list.Count(x => !(x.GradedAt != default(DateTime) || x.Score > 0 || !string.IsNullOrWhiteSpace(x.Feedback)))</span>
+<body>
+    <div class="wrap">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-inner">
+                <div>
+                    <div class="hero-title">My Submissions</div>
+                    <div class="hero-sub">Theo dõi bài đã nộp, điểm và nhận xét (nếu đã chấm).</div>
+                    <div class="pillrow">
+                        <span class="pill">Tổng: @list.Count</span>
+                        <span class="pill">Đã chấm: @gradedCount</span>
+                        <span class="pill">Chờ chấm: @pendingCount</span>
+                    </div>
                 </div>
+                <div class="pill">Student Area</div>
             </div>
-            <div class="pill">Student Area</div>
         </div>
-    </div>
 
-    <div class="grid">
+        <div class="grid">
 
-        <!-- LEFT: submissions list -->
-        <div class="cardx card-pad">
-            <div class="hrow">
-                <h3>Danh sách bài nộp</h3>
-                <div class="muted">Mới nhất → cũ hơn</div>
-            </div>
+            <!-- LEFT: submissions list -->
+            <div class="cardx card-pad">
+                <div class="hrow">
+                    <h3>Danh sách bài nộp</h3>
+                    <div class="muted">Mới nhất → cũ hơn</div>
+                </div>
 
-            @if (!list.Any())
-            {
-                <div class="muted" style="margin-top:10px;">Chưa có bài nộp nào.</div>
-            }
-            else
-            {
-                <div class="alist">
-                    @foreach (var s in list)
-                    {
-                        var hasFile = !string.IsNullOrWhiteSpace(s.FileUrl);
-                        var graded = s.GradedAt != default(DateTime) || s.Score > 0 || !string.IsNullOrWhiteSpace(s.Feedback);
+                @if (!list.Any())
+                {
+                    <div class="muted" style="margin-top:10px;">Chưa có bài nộp nào.</div>
+                }
+                else
+                {
+                    <div class="alist">
+                        @foreach (var s in list)
+                        {
+                            var hasFile = !string.IsNullOrWhiteSpace(s.FileUrl);
+                            var graded = IsGraded(s);
 
-                        <div class="a">
-                            <div class="a-left">
-                                <div class="ico">@(graded ? "✓" : "⏳")</div>
+                            var title = s.Assignment?.Title ?? $"Assignment #{s.AssignmentId}";
+                            var desc = s.Assignment?.Description;
 
-                                <div class="a-text">
-                                    <div class="a-title" title="Submission #@s.Id">
-                                        Submission #@s.Id
-                                    </div>
+                            <div class="a">
+                                <div class="a-left">
+                                    <div class="ico">@(graded ? "✓" : "⏳")</div>
 
-                                    <div class="a-desc">
-                                        @if (s.Assignment != null)
+                                    <div class="a-text">
+                                        <div class="a-title" title="@title">
+                                            @title
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(desc))
                                         {
-                                            <span><strong>@s.Assignment.Title</strong></span>
+                                            <div class="a-desc">@desc</div>
                                         }
                                         else
                                         {
-                                            <span class="muted">Assignment #@s.AssignmentId</span>
+                                            <div class="a-desc muted">Submission #@s.Id</div>
                                         }
-                                    </div>
 
-                                    <div class="meta">
-                                        <span class="tag gray">Assignment #@s.AssignmentId</span>
-                                        <span class="tag @StatusClass(s)">@StatusLabel(s)</span>
+                                        <div class="meta">
+                                            <span class="tag gray">Submission #@s.Id</span>
+                                            <span class="tag gray">Assignment #@s.AssignmentId</span>
+                                            <span class="tag @StatusClass(s)">@StatusLabel(s)</span>
 
-                                        @if (graded)
-                                        {
-                                            <span class="tag">Score: @s.Score</span>
-                                            @if (!string.IsNullOrWhiteSpace(s.Feedback))
+                                            @if (graded)
                                             {
-                                                <span class="tag">Feedback</span>
+                                                <span class="tag">Score: @s.Score</span>
+                                                @if (!string.IsNullOrWhiteSpace(s.Feedback))
+                                                {
+                                                    <span class="tag">Feedback</span>
+                                                }
                                             }
-                                        }
 
-                                        @if (!hasFile)
+                                            @if (!hasFile)
+                                            {
+                                                <span class="tag danger">Missing file</span>
+                                            }
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(s.Feedback))
                                         {
-                                            <span class="tag danger">Missing file</span>
+                                            <div class="muted" style="margin-top:8px; line-height:1.55;">
+                                                <strong style="color:rgba(0,0,0,.82);">Nhận xét:</strong>
+                                                @s.Feedback
+                                            </div>
                                         }
                                     </div>
+                                </div>
 
-                                    @if (!string.IsNullOrWhiteSpace(s.Feedback))
-                                    {
-                                        <div class="muted" style="margin-top:8px; line-height:1.55;">
-                                            <strong style="color:rgba(0,0,0,.82);">Nhận xét:</strong>
-                                            @s.Feedback
-                                        </div>
-                                    }
+                                <div class="a-right">
+                                    <a class="btnx"
+                                       href="@(hasFile? Url.Content(s.FileUrl) : "javascript:void(0)")"
+                                       target="_blank"
+                                       style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                                        Download
+                                    </a>
+
+                                    <a class="btnx"
+                                       asp-area="Student"
+                                       asp-controller="Submission"
+                                       asp-action="Detail"
+                                       asp-route-subId="@s.Id">
+                                        Details
+                                    </a>
+
+                                    <div class="time">
+                                        Nộp: @s.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
+                                        @if (s.GradedAt != default(DateTime))
+                                        {
+                                            <br />
+                                            <span>Chấm: @s.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                        }
+                                    </div>
                                 </div>
                             </div>
+                        }
+                    </div>
+                }
+            </div>
 
-                            <div class="a-right">
-                                <a class="btnx"
-                                   href="@(hasFile? Url.Content(s.FileUrl) : "javascript:void(0)")"
-                                   target="_blank"
-                                   style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
-                                    Download
-                                </a>
-
-                                <a class="btnx"
-                                   asp-area="Student"
-                                   asp-controller="Submission"
-                                   asp-action="Detail"
-                                   asp-route-subId="@s.Id">
-                                    Details
-                                </a>
-
-                                <div class="time">
-                                    Nộp: @s.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
-                                    @if (s.GradedAt != default(DateTime))
-                                    {
-                                        <br />
-                                        <>Chấm: @s.GradedAt.ToString("dd/MM/yyyy HH:mm")</>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
+            <!-- RIGHT: quick actions -->
+            <div class="cardx widget">
+                <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <h3 style="margin:0; font-weight:900;">Quick actions</h3>
+                    <span class="tag">Submissions</span>
                 </div>
-            }
-        </div>
 
-        <!-- RIGHT: quick actions -->
-        <div class="cardx widget">
-            <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <h3 style="margin:0; font-weight:900;">Quick actions</h3>
-                <span class="tag">Submissions</span>
+                <a class="btnx primary mb-2"
+                   asp-area="Student" asp-controller="Assignment" asp-action="Index">
+                    Quay lại Assignments
+                </a>
+
+                @* Change Courses -> Course if your controller name is CourseController *@
+                <a class="btnx"
+                   asp-area="Student" asp-controller="Course" asp-action="Index">
+                    Tới Khóa học
+                </a>
+
+                <div class="muted" style="margin-top:10px; line-height:1.5;">
+                    Tip: Pending lâu quá thì giảng viên đang “review” theo chuẩn doanh nghiệp. 😄
+                </div>
             </div>
 
-            <a class="btnx primary mb-2"
-               asp-area="Student" asp-controller="Assignment" asp-action="Index">
-                Quay lại Assignments
-            </a>
-
-            <a class="btnx"
-               asp-area="Student" asp-controller="Courses" asp-action="Index">
-                Tới Khóa học
-            </a>
-
-            <div class="muted" style="margin-top:10px; line-height:1.5;">
-                Tip: Nếu thấy “Pending” lâu quá thì… giảng viên đang “review” hơi lâu (corporate word for “bận”). 😄
-            </div>
         </div>
-
     </div>
-</div>
+</body>
