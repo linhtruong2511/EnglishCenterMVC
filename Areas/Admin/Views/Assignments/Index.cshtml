@@ -23,14 +23,9 @@
                 @Html.DisplayNameFor(model => model.TypeSubmit)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.FileUrl)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Course)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course)
-            </th>
+           
             <th>
                 @Html.DisplayNameFor(model => model.Deadline)
             </th>
@@ -53,19 +48,13 @@
                 @Html.DisplayFor(modelItem => item.TypeSubmit)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.FileUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Course.Id)
+                @Html.DisplayFor(modelItem => item.Course.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Deadline)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CreateAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdateAt)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

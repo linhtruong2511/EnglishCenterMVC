@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EnglishCenterMVC.Services;
 using EnglishCenterMVC.Areas.Admin.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EnglishCenterMVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize]
     public class AssignmentsController : Controller
     {
         private IAssignmentService assignmentService;
@@ -21,7 +23,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var assignments = await assignmentService.GetAssignmentsAsync();
+            var assignments = await assignmentService.GetAllAsync();
             return View(assignments);
         }
 
@@ -91,6 +93,7 @@ namespace EnglishCenterMVC.Areas.Admin.Controllers
                 SubmitType = assignment.TypeSubmit,
                 Deadline = assignment.Deadline,
                 CourseId = assignment.CourseId,
+                AllowResubmit = assignment.AllowResubmit,
             });
         }
 

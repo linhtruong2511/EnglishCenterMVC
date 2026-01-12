@@ -233,7 +233,18 @@
                                         </a>
 
                                         <!-- Submit (compact) -->
-                                        <form asp-area="Student"
+                                        @if (a.IsSubmit && !a.AllowResubmit) 
+                                        {
+                                            <button class="btnx primary"
+                                                    type="submit"
+                                                    id="btnSubmit_@a.Id"
+                                                    disabled
+                                                    style="opacity:.55; cursor:not-allowed; @(isOverdue ? "pointer-events:none;" : "")">
+                                                Đã nộp
+                                            </button>
+                                        }
+                                        else {
+                                            <form asp-area="Student"
                                               asp-controller="Assignment"
                                               asp-action="SubmitFile"
                                               method="post"
@@ -268,6 +279,7 @@
                                                 @(a.AllowResubmit ? "Nộp lại" : "Nộp bài")
                                             </button>
                                         </form>
+                                        }
                                     </div>
                                 </div>
                             }
