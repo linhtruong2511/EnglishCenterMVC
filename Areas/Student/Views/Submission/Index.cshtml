@@ -29,6 +29,7 @@
 </head>
 <body>
     <div class="wrap">
+
         <!-- Hero -->
         <div class="hero">
             <div class="hero-inner">
@@ -46,7 +47,6 @@
         </div>
 
         <div class="grid">
-
             <!-- LEFT: submissions list -->
             <div class="cardx card-pad">
                 <div class="hrow">
@@ -131,7 +131,7 @@
                                         @if (s.GradedAt != default(DateTime))
                                         {
                                             <br />
-                                            <span>Chấm: @s.GradedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                            <span>Chấm: @s.GradedAt.ToString()</span>
                                         }
                                     </div>
                                 </div>
@@ -141,41 +141,11 @@
                 }
             </div>
 
-<<<<<<< HEAD
             <!-- RIGHT: quick actions -->
             <div class="cardx widget">
                 <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                     <h3 style="margin:0; font-weight:900;">Quick actions</h3>
                     <span class="tag">Submissions</span>
-=======
-                            <div class="a-right">
-                                <a class="btnx"
-                                   href="@(hasFile? Url.Content(s.FileUrl) : "javascript:void(0)")"
-                                   target="_blank"
-                                   style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
-                                    Download
-                                </a>
-
-                                <a class="btnx"
-                                   asp-area="Student"
-                                   asp-controller="Submission"
-                                   asp-action="Detail"
-                                   asp-route-subId="@s.Id">
-                                    Details
-                                </a>
-
-                                <div class="time">
-                                    Nộp: @s.SubmittedAt.ToString("dd/MM/yyyy HH:mm")
-                                    @if (s.GradedAt != default(DateTime))
-                                    {
-                                        <br />
-                                        <>Chấm: @s.GradedAt.?ToString("dd/MM/yyyy HH:mm")</>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
->>>>>>> 048267c192b1bd78508ca0e189c37d3288d5b6c0
                 </div>
 
                 <a class="btnx primary mb-2"
