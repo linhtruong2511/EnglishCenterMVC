@@ -1,25 +1,37 @@
 ﻿@{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
-    bool openFirst = false;
+    bool openFirst = true; // nicer UX: open first section by default
 }
 @model IEnumerable<SectionVM>
 
 <head>
     <link rel="stylesheet" href="~/css/lessons.css" />
 </head>
+
 <body>
     <div class="sec-wrap container-fluid">
-        <div class="sec-head">
-            <div>
-                <h2>Sections</h2>
-                <div class="sub">Open a section to see lessons.</div>
-            </div>
 
-            <div class="top-actions">
-                <a class="btnx" asp-area="Student" asp-controller="Courses" asp-action="Index">Back</a>
+        <!-- Hero-ish header (no CSS change, just structure) -->
+        <div class="sec-head" style="gap:14px;">
+            <div style="min-width:0;">
+                <h2 style="margin:0; display:flex; align-items:center; gap:10px;">
+                    <span style="display:inline-flex; width:38px; height:38px; border-radius:14px;
+                                 border:1px solid var(--border); align-items:center; justify-content:center;">
+                        📚
+                    </span>
+                    <span>Sections</span>
+                </h2>
+
+                <div class="sub" style="margin-top:6px;">
+                    Chọn 1 section để xem lessons và tiếp tục học.
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                    <span class="pill">Tổng section: @(Model?.Count() ?? 0)</span>
+                    <span class="pill">Tip: mở theo thứ tự từ trên xuống</span>
+                </div>
             </div>
-        </div>
 
         @if (Model.Count() == 0)
         {

@@ -1,220 +1,284 @@
-﻿@{
-    ViewData["Title"] = "Index";
+﻿@using System.Linq
+@using System
+@{
+    ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+
+    var now = DateTime.Now;
+
+    var courses = ViewBag.Courses as IEnumerable<EnglishCenterMVC.Models.Course>
+                  ?? Enumerable.Empty<EnglishCenterMVC.Models.Course>();
+
+    var assignments = ViewBag.Assignments as IEnumerable<EnglishCenterMVC.Models.Assignment>
+                      ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>();
+
+    var submissions = ViewBag.Submissions as IEnumerable<EnglishCenterMVC.Models.Submission>
+                      ?? Enumerable.Empty<EnglishCenterMVC.Models.Submission>();
+
+    // Only alive assignments
+    var liveAssignments = assignments
+        .Where(a => a != null && !a.IsDeleted)
+        .ToList();
+
+    // Due soon window
+    var dueSoonDays = 7;
+    var dueSoon = liveAssignments
+        .Where(a => a.Deadline >= now && (a.Deadline - now).TotalDays <= dueSoonDays)
+        .OrderBy(a => a.Deadline)
+        .ToList();
+
+    var overdue = liveAssignments
+        .Where(a => a.Deadline < now)
+        .OrderByDescending(a => a.Deadline)
+        .ToList();
+
+    var recentSubs = submissions
+        .OrderByDescending(s => s.SubmittedAt)
+        .Take(6)
+        .ToList();
+
+    int DaysLeft(DateTime deadline) => (int)Math.Ceiling((deadline - now).TotalDays);
+
+    string DueClass(DateTime deadline)
+    {
+        var d = (deadline - now).TotalDays;
+        if (d < 0) return "danger";
+        if (d <= 1) return "danger";
+        if (d <= 3) return "warn";
+        return "ok";
+    }
+
+    string DueText(DateTime deadline)
+    {
+        var d = DaysLeft(deadline);
+        if (deadline < now) return "Quá hạn";
+        if (d == 0) return "Hôm nay";
+        if (d == 1) return "Còn 1 ngày";
+        return $"Còn {d} ngày";
+    }
+
+    // mini calendar: next 14 days
+    var calDays = Enumerable.Range(0, 14)
+        .Select(i => now.Date.AddDays(i))
+        .ToList();
+
+    int DueCountOn(DateTime date)
+        => liveAssignments.Count(a => a.Deadline.Date == date.Date);
+
+    string CalDotClass(DateTime date)
+    {
+        // pick worst severity among due items that day
+        var items = liveAssignments.Where(a => a.Deadline.Date == date.Date).ToList();
+        if (!items.Any()) return "none";
+
+        if (items.Any(a => a.Deadline < now)) return "danger";
+        if (items.Any(a => (a.Deadline - now).TotalDays <= 1)) return "danger";
+        if (items.Any(a => (a.Deadline - now).TotalDays <= 3)) return "warn";
+        return "ok";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/ass.css" />
+    <link rel="stylesheet" href="~/css/studentDashboard.css" />
 }
 
 <div class="dash-wrap">
-    <!-- Top bar -->
-    <div class="dash-topbar">
-        <div class="dash-title">
-            <h2>Chào mừng bạn trở lại!</h2>
-            <p class="muted">Hãy cùng nhau tiếp tục hành trình phát triển Ngoại ngữ.</p>
-        </div>
-        <div class="dash-actions">
-            <a asp-controller="Courses" asp-action="Index" class="btnx">Vào học</a>
+    <!-- Header (Hero) -->
+    <div class="cardx" style="padding:18px 18px 16px; border-radius:22px;">
+        <div style="
+        display:flex;
+        align-items:flex-end;
+        justify-content:space-between;
+        gap:14px;
+        padding:16px 16px 14px;
+        border-radius:18px;
+        border:1px solid var(--border);
+        background:
+            radial-gradient(900px 220px at 15% 0%, rgba(59,130,246,.18), transparent 60%),
+            radial-gradient(700px 240px at 85% 0%, rgba(16,185,129,.14), transparent 55%),
+            linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.85));
+        overflow:hidden;
+        position:relative;">
+
+            <!-- decorative hero image (inline SVG, no assets needed) -->
+            <div aria-hidden="true" style="
+            position:absolute;
+            right:14px;
+            top:10px;
+            width:220px;
+            height:120px;
+            opacity:.95;
+            pointer-events:none;
+            filter: drop-shadow(0 10px 18px rgba(0,0,0,.08));
+        ">
+                <svg viewBox="0 0 260 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                            <stop offset="0" stop-color="#3b82f6" stop-opacity=".55" />
+                            <stop offset="1" stop-color="#10b981" stop-opacity=".35" />
+                        </linearGradient>
+                    </defs>
+                    <rect x="12" y="18" rx="18" ry="18" width="160" height="104" fill="url(#g1)" />
+                    <rect x="28" y="34" rx="10" ry="10" width="128" height="16" fill="#ffffff" opacity=".80" />
+                    <rect x="28" y="58" rx="10" ry="10" width="92" height="14" fill="#ffffff" opacity=".65" />
+                    <rect x="28" y="80" rx="10" ry="10" width="116" height="14" fill="#ffffff" opacity=".55" />
+                    <circle cx="214" cy="48" r="22" fill="#3b82f6" opacity=".25" />
+                    <circle cx="224" cy="86" r="28" fill="#10b981" opacity=".20" />
+                </svg>
+            </div>
+
+            <div class="dash-title" style="position:relative; z-index:1; max-width:68%;">
+                <h2 style="margin:0; font-weight:950; letter-spacing:-.4px;">Chào mừng bạn trở lại 👋</h2>
+                <p class="muted" style="margin:6px 0 0; line-height:1.45;">
+                    Tổng quan nhanh: khóa học, hạn nộp, trạng thái bài nộp.
+                </p>
+
+                <!-- Optional small “status pills” row -->
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                    <span class="tag">Dashboard</span>
+                    <span class="tag gray">Student Area</span>
+                    <span class="tag @(overdue.Any() ? "danger" : "ok")">
+                        @(overdue.Any() ? $"Overdue: {overdue.Count}" : "No overdue")
+                    </span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center; position:relative; z-index:1;">
+                <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btnx primary">Courses</a>
+                <a asp-area="Student" asp-controller="Assignment" asp-action="Index" class="btnx">Assignments</a>
+                <a asp-area="Student" asp-controller="Submission" asp-action="Index" class="btnx">Submissions</a>
+            </div>
         </div>
     </div>
 
-    <div class="dash-grid py-1">
 
-        <!-- Column 1: Course Progress + Daily Goal + Words Learned -->
-        <div class="cardx">
-
-            <div class="d-flex mb-1" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-                <div>
-                    <h5>Quá trình học tập</h5>
-                </div>
-                <span class="tag">Trình độ: English A2</span>
-            </div>
-            <hr />
-            <div class="progress-list">
-                <div class="progress-row">
-                    <div style="min-width:150px; font-weight:700;">Mốc</div>
-                    <div class="bar"><span style="width:45%"></span></div>
-                    <div class="muted" style="min-width:60px; text-align:right;">45%</div>
-                </div>
-                <div class="progress-row">
-                    <div style="min-width:150px; font-weight:700;">Tiến độ học tập</div>
-                    <div class="bar"><span style="width:70%"></span></div>
-                    <div class="muted" style="min-width:60px; text-align:right;">70%</div>
-                </div>
-                <div class="progress-row">
-                    <div style="min-width:150px; font-weight:700;">Buổi học</div>
-                    <div class="bar"><span style="width:30%"></span></div>
-                    <div class="muted" style="min-width:60px; text-align:right;">3/10</div>
-                </div>
-            </div>
-            <hr />
-            <div class="split">
-
-                <!-- Daily Goal -->
-                <div class="cardx" style="border-radius:12px; padding:14px; box-shadow:none;">
-                    <h5>Daily Goal</h5>
-                    <div class="goal-grid">
-                        <div class="goal-line">
-                            <span class="muted">Điểm tích lũy</span>
-                            <strong>23 / 50</strong>
-                        </div>
-                        <div class="bar"><span style="width:46%"></span></div>
-
-                        <div class="goal-line" style="margin-top:6px;">
-                            <span class="muted">Chuỗi</span>
-                            <strong>7 ngày</strong>
-                        </div>
-                        <div class="muted fw-semibold" style="margin-top:8px;">Hãy tiếp tục hoàn thiện bài tập và duy trì chuỗi!</div>
-
-                        <a asp-controller="Assignment" asp-action="Index" class="btnx primary" style="width:100%; margin-top:6px;">Đạt mục tiêu hôm nay</a>
-                    </div>
-                </div>
-
-                <!-- Words Learned Chart (placeholder) -->
-                <div class="cardx" style="border-radius:12px; padding:14px; box-shadow:none;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h5 style="margin:0;">Vốn từ vựng</h5>
-                        <span class="tag">Tuần này</span>
-                    </div>
-                    <div class="chart-box" style="margin-top:10px;">
-                        <span class="fw-semibold fst-italic" style="font-size:xx-large">[ Limerance ]</span>
-                    </div>
-                    <div class="muted" style="margin-top:8px;">Xu hướng: ổn định. Cố gắng duy trì trước các câu khó.</div>
-                </div>
-
-            </div>
+    <!-- KPI strip -->
+    <div class="dash-kpi" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-top:14px;">
+        <div class="cardx" style="padding:14px;">
+            <div class="muted" style="font-weight:800;">Courses</div>
+            <div style="font-size:1.8rem; font-weight:900; margin-top:2px;">@courses.Count()</div>
+            <div class="muted" style="margin-top:4px;">Active learning paths</div>
         </div>
 
-        <!-- Column 2: League / Leaderboard -->
-        <div class="cardx">
-            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-                <div>
-                    <h5>Hạng Bạc</h5>
-                    <div class="muted">Tích cực thi đua và cạnh tranh.</div>
-                </div>
-                <span class="tag">Kết thúc vào: CN</span>
-            </div>
-
-            <div class="league-list">
-                <div class="league-item">
-                    <div class="league-left">
-                        <div class="rank">1</div>
-                        <span class="avatar"></span>
-                        <div>
-                            <div style="font-weight:800;">Clara Diaz</div>
-                            <div class="muted">1,240 XP</div>
-                        </div>
-                    </div>
-                    <span class="tag">↑</span>
-                </div>
-
-                <div class="league-item">
-                    <div class="league-left">
-                        <div class="rank">2</div>
-                        <span class="avatar"></span>
-                        <div>
-                            <div style="font-weight:800;">Tôi</div>
-                            <div class="muted">980 XP</div>
-                        </div>
-                    </div>
-                    <span class="tag">—</span>
-                </div>
-
-                <div class="league-item">
-                    <div class="league-left">
-                        <div class="rank">3</div>
-                        <span class="avatar"></span>
-                        <div>
-                            <div style="font-weight:800;">Mina Tran</div>
-                            <div class="muted">910 XP</div>
-                        </div>
-                    </div>
-                    <span class="tag">↓</span>
-                </div>
-
-                <div class="league-item">
-                    <div class="league-left">
-                        <div class="rank">4</div>
-                        <span class="avatar"></span>
-                        <div>
-                            <div style="font-weight:800;">Zane G.</div>
-                            <div class="muted">860 XP</div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btnx" style="width:100%; margin-top:4px;">Hiển thị bảng xếp hạng</button>
-            </div>
+        <div class="cardx" style="padding:14px;">
+            <div class="muted" style="font-weight:800;">Due soon</div>
+            <div style="font-size:1.8rem; font-weight:900; margin-top:2px;">@dueSoon.Count</div>
+            <div class="muted" style="margin-top:4px;">Trong @dueSoonDays ngày tới</div>
         </div>
 
-        <!-- Column 3: Profile + Next Achievement + Friends -->
-        <div class="cardx">
-            <div class="profile">
-                <div class="profile-main">
-                    <span class="avatar"></span>
-                    <div>
-                        <div style="font-weight:900; font-size:1.05rem;">Học viên</div>
-                        <div class="muted">XP: 2,681 • Bậc: A2</div>
-                    </div>
+        <div class="cardx" style="padding:14px;">
+            <div class="muted" style="font-weight:800;">Overdue</div>
+            <div style="font-size:1.8rem; font-weight:900; margin-top:2px; color:var(--danger);">@overdue.Count</div>
+            <div class="muted" style="margin-top:4px;">Cần xử lý ngay</div>
+        </div>
+
+        <div class="cardx" style="padding:14px;">
+            <div class="muted" style="font-weight:800;">Recent submissions</div>
+            <div style="font-size:1.8rem; font-weight:900; margin-top:2px;">@recentSubs.Count()</div>
+            <div class="muted" style="margin-top:4px;">Theo dõi chấm điểm</div>
+        </div>
+    </div>
+
+    <!-- Option A row -->
+    <div class="dash-row"
+         style="margin-top:14px; display:grid; grid-template-columns: 1.25fr 1fr 1fr; gap:14px; align-items:start;">
+
+        <!-- LEFT: Focus + deadlines -->
+        <div class="cardx dash-card" style="padding:14px;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+                <div>
+                    <h5 style="margin:0; font-weight:900;">Hôm nay làm gì?</h5>
+                    <div class="muted" style="margin-top:4px;">3 nút, 3 đường thẳng—đỡ lạc.</div>
                 </div>
-                <button class="btnx">Tài khoản</button>
+                <span class="tag">Focus</span>
             </div>
 
-            <div class="pillrow">
-                <div class="pill">🔥 Chuỗi: 7</div>
-                <div class="pill">🏆 Hạng: Silver</div>
+            <div style="display:grid; gap:10px; margin-top:12px;">
+                <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btnx primary" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Tiếp tục học</span><span style="opacity:.9;">→</span>
+                </a>
+                <a asp-area="Student" asp-controller="Assignment" asp-action="Index" class="btnx" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Làm bài tập</span><span style="opacity:.8;">→</span>
+                </a>
+                <a asp-area="Student" asp-controller="Submission" asp-action="Index" class="btnx" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Xem bài đã nộp</span><span style="opacity:.8;">→</span>
+                </a>
             </div>
 
-            <hr style="border:none; border-top:1px solid rgba(0,0,0,.08); margin:14px 0;">
+            <hr style="border:none; border-top:1px solid rgba(0,0,0,.08); margin:14px 0;" />
 
-            <div>
-                <h5 style="margin-bottom:6px;">Thành tích kế tiếp</h5>
-                <div class="muted">Hoàn thành hoàn hảo 3 bài tập.</div>
-                <div class="bar" style="margin-top:10px;"><span style="width:33%"></span></div>
-                <div class="muted" style="margin-top:6px;">Quá trình: 1 / 3</div>
-                <button class="btnx primary" style="width:100%; margin-top:10px;">Tiến hành chinh phục thành tích</button>
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                <h5 style="margin:0; font-weight:900;">Hạn sắp tới</h5>
+                <span class="muted">Top 5</span>
             </div>
 
-            <hr style="border:none; border-top:1px solid rgba(0,0,0,.08); margin:14px 0;">
-
-            <div>
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                    <h5 style="margin:0;">Bạn bè</h5>
-                    <span class="tag">3 online</span>
+            @if (!dueSoon.Any())
+            {
+                <div class="muted" style="margin-top:10px;">Không có bài sắp đến hạn. Giữ form tốt. ✅</div>
+            }
+            else
+            {
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                    @foreach (var a in dueSoon.Take(5))
+                    {
+                        <div style="border:1px solid var(--border); border-radius:14px; padding:10px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
+                            <div style="min-width:0;">
+                                <div style="font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="@a.Title">@a.Title</div>
+                                <div class="muted" style="margin-top:3px;">Course #@a.CourseId • @a.Deadline.ToString("dd/MM HH:mm")</div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex:0 0 auto;">
+                                <span class="tag @DueClass(a.Deadline)">@DueText(a.Deadline)</span>
+                                <a asp-area="Student" asp-controller="Assignment" asp-action="Index" class="btnx primary" style="padding:7px 10px;">Go</a>
+                            </div>
+                        </div>
+                    }
                 </div>
+            }
+        </div>
 
-                <div class="friends">
-                    <div class="friend">
-                        <div class="friend-left">
-                            <span class="avatar"></span>
-                            <div>
-                                <div style="font-weight:800;">An Luu</div>
-                                <div class="muted">+20 XP</div>
-                            </div>
-                        </div>
-                        <button class="btnx">Nudge</button>
-                    </div>
-
-                    <div class="friend">
-                        <div class="friend-left">
-                            <span class="avatar"></span>
-                            <div>
-                                <div style="font-weight:800;">Gary Carter</div>
-                                <div class="muted">Chuỗi: 12</div>
-                            </div>
-                        </div>
-                        <button class="btnx">Message</button>
-                    </div>
-
-                    <div class="friend">
-                        <div class="friend-left">
-                            <span class="avatar"></span>
-                            <div>
-                                <div style="font-weight:800;">Mina Tran</div>
-                                <div class="muted">Đối thủ</div>
-                            </div>
-                        </div>
-                        <button class="btnx">Thách đấu!</button>
-                    </div>
+        <!-- CALENDAR: spans 2 columns -->
+        <div class="cardx dash-card"
+             style="padding:20px; grid-column: 2 / 4; width:100%; min-width:0;">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+                <div>
+                    <h5 style="margin:0; font-weight:900;">Lịch hạn nộp</h5>
+                    <div class="muted" style="margin-top:4px;">Màu theo độ gấp • click là đi làm bài.</div>
                 </div>
+                <a asp-area="Student" asp-controller="Assignment" asp-action="Index" class="btnx">Open</a>
+            </div>
+
+            <div class="cal-grid"
+                 style="margin-top:12px; display:grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap:8px;">
+                @foreach (var d in calDays)
+                {
+                    var c = DueCountOn(d);
+                    var dot = CalDotClass(d);
+
+                    <a asp-area="Student" asp-controller="Assignment" asp-action="Index"
+                       style="text-decoration:none; color:inherit;">
+                        <div style="border:1px solid var(--border); border-radius:14px; padding:10px; background:#fff;
+                                        display:flex; flex-direction:column; gap:8px;
+                                        @(d.Date == now.Date ? "outline:2px solid rgba(59,130,246,.20);" : "")">
+                            <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+                                <div class="muted" style="font-weight:900; font-size:.78rem;">@d.ToString("ddd")</div>
+                                <div style="font-weight:900;">@d.ToString("dd")</div>
+                            </div>
+
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                                <span class="tag @dot" style="padding:5px 9px;">@(c == 0 ? "—" : $"{c}")</span>
+                                <span class="muted" style="font-size:.82rem;">due</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <div class="muted" style="margin-top:10px; line-height:1.5;">
+                Tip: mục “due” là số bài đến hạn trong ngày đó. Nhìn đỏ là ưu tiên xử lý trước.
             </div>
         </div>
     </div>
 </div>
+
+
