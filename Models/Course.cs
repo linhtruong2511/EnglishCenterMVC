@@ -17,5 +17,6 @@ namespace EnglishCenterMVC.Models
         public Category Category { get; set; }
         public ICollection<Tag> Tags { get; set; }
         public ICollection<Section> Sections { get; set; }
+        public ICollection<Classes> Classes { get; set; }
     }
 }
