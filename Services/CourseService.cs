@@ -41,6 +41,7 @@ namespace EnglishCenterMVC.Services
         async Task<IEnumerable<Course>> ICourseService.GetByUserId(string userId)
         {
             return await context.Classes
+                .Include(c => c.Course).ThenInclude(co => co.Category)
                 .Where(c => c.Users.Any(u => u.Id == userId))
                 .Select(c => c.Course)
                 .Distinct()

@@ -26,6 +26,12 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var course = await courseService.GetByUserId(userId);
+            HashSet<Category> categories = new HashSet<Category>();
+            foreach (var item in course)
+            {
+                categories.Add(item.Category);
+            }
+            ViewBag.Categories = categories;
             return View(course);
         }
 
