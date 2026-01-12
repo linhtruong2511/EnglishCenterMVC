@@ -1,66 +1,192 @@
 ﻿@model IEnumerable<EnglishCenterMVC.Models.Classes>
+@using System.Linq
+@using System
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "My Classes";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+
+    var list = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Classes>()).ToList();
+    var now = DateTime.Now;
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaxStudent)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Course)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ClassStatus)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaxStudent)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Course.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ClassStatus)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@section Styles {
+    <link rel="stylesheet" href="~/css/ass.css" />
+    <link rel="stylesheet" href="~/css/display.css" />
 }
-    </tbody>
-</table>
+
+<div class="course-wrap container-fluid">
+
+    <!-- Hero / Top -->
+    <div class="course-top">
+        <div class="course-title">
+            <h2>My Classes</h2>
+            <div class="muted">
+                Lịch học + trạng thái lớp — quản lý như dashboard, không phải “bảng chấm công”.
+            </div>
+
+            <div class="pillrow" style="margin-top:10px;">
+                <span class="pill">Tổng: @list.Count</span>
+                <span class="pill">Đang diễn ra: @list.Count(x => x.StartDate <= now && x.EndDate >= now)</span>
+                <span class="pill">Sắp bắt đầu: @list.Count(x => x.StartDate > now)</span>
+            </div>
+        </div>
+
+        <div class="course-actions">
+            <div class="searchbox">
+                <input id="classSearch" type="search" placeholder="Search classes..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="toolbar">
+        <button class="chip active" type="button" data-filter="all">All</button>
+        <button class="chip" type="button" data-filter="running">Running</button>
+        <button class="chip" type="button" data-filter="upcoming">Upcoming</button>
+        <button class="chip" type="button" data-filter="ended">Ended</button>
+    </div>
+
+    @if (!list.Any())
+    {
+        <div class="empty">
+            <strong>No classes assigned yet.</strong>
+            <div class="muted">Khi được xếp lớp, danh sách sẽ hiện ở đây.</div>
+        </div>
+    }
+    else
+    {
+        <div id="classGrid" class="grid">
+            @foreach (var c in list)
+            {
+                var courseName = c.Course?.Name ?? $"Course #{c.Course?.Id}";
+                var courseId = c.Course?.Id ?? 0;
+
+                var phase =
+                (c.EndDate < now) ? "ended" :
+                (c.StartDate > now) ? "upcoming" : "running";
+
+                string PhaseLabel(string p) => p switch
+                {
+                    "running" => "Running",
+                    "upcoming" => "Upcoming",
+                    _ => "Ended"
+                };
+
+                string PhasePill(string p) => p switch
+                {
+                    "running" => "ok",
+                    "upcoming" => "warn",
+                    _ => "gray"
+                };
+
+                <div class="cardx course-card"
+                     data-name="@(c.Name ?? "")"
+                     data-course="@(courseName ?? "")"
+                     data-phase="@phase">
+
+                    <!-- Header strip like thumbnail area -->
+                    <div class="thumb" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
+                            <div style="min-width:0;">
+                                <div class="muted" style="font-weight:900; font-size:.85rem;">Class</div>
+                                <div style="font-weight:950; font-size:1.05rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                                     title="@c.Name">
+                                    @c.Name
+                                </div>
+                            </div>
+                            <span class="pill @PhasePill(phase)">@PhaseLabel(phase)</span>
+                        </div>
+
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                            <span class="pill">Max: @c.MaxStudent</span>
+                            <span class="pill">Course: @(courseId == 0 ? "N/A" : $"#{courseId}")</span>
+                            @if (!string.IsNullOrWhiteSpace(c.ClassStatus.ToString()))
+                            {
+                                <span class="pill">@c.ClassStatus</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="body">
+                        <div class="name" title="@courseName">@courseName</div>
+
+                        <div class="desc" style="display:flex; gap:12px; flex-wrap:wrap;">
+                            <span class="muted">Start: <strong>@c.StartDate.ToString("dd/MM/yyyy")</strong></span>
+                            <span class="muted">End: <strong>@c.EndDate.ToString("dd/MM/yyyy")</strong></span>
+                        </div>
+
+                        <div class="meta" style="margin-top:10px;">
+                            <span class="pill gray">Class #@c.Id</span>
+                            @if (phase == "running")
+                            {
+                                <span class="pill ok">In session</span>
+                            }
+                            else if (phase == "upcoming")
+                            {
+                                var days = (int)Math.Ceiling((c.StartDate - now).TotalDays);
+                                <span class="pill warn">Starts in @(Math.Max(days, 0))d</span>
+                            }
+                            else
+                            {
+                                <span class="pill gray">Completed</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="btnrow">
+                        <!-- Pick what "Open" means for you; leaving to Details is safe -->
+                        <a class="btnx primary"
+                           asp-action="Details"
+                           asp-route-id="@c.Id">Open</a>
+
+                        <a class="btnx"
+                           asp-action="Details"
+                           asp-route-id="@c.Id">Details</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    (function () {
+        const search = document.getElementById("classSearch");
+        const grid = document.getElementById("classGrid");
+        const chips = document.querySelectorAll(".chip");
+
+        if (!grid) return;
+
+        let activeFilter = "all";
+
+        function applyFilter() {
+            const q = (search?.value || "").trim().toLowerCase();
+            const cards = grid.querySelectorAll(".course-card");
+
+            cards.forEach(card => {
+                const name = (card.getAttribute("data-name") || "").toLowerCase();
+                const course = (card.getAttribute("data-course") || "").toLowerCase();
+                const phase = (card.getAttribute("data-phase") || "").toLowerCase();
+
+                const matchText = !q || name.includes(q) || course.includes(q);
+                const matchPhase = activeFilter === "all" || phase === activeFilter;
+
+                card.style.display = (matchText && matchPhase) ? "" : "none";
+            });
+        }
+
+        if (search) search.addEventListener("input", applyFilter);
+
+        chips.forEach(btn => {
+            btn.addEventListener("click", () => {
+                chips.forEach(x => x.classList.remove("active"));
+                btn.classList.add("active");
+                activeFilter = btn.getAttribute("data-filter") || "all";
+                applyFilter();
+            });
+        });
+
+        applyFilter();
+    })();
+</script>
