@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EnglishCenterMVC.Services;
-using System.Threading.Tasks;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {

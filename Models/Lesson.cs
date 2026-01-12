@@ -8,6 +8,7 @@ namespace EnglishCenterMVC.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+
         public string? videoUrl { get; set; }
         public string? videoTitle { get; set; }
         public string? fileUrl { get; set; }

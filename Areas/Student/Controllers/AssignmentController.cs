@@ -18,6 +18,7 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             this.assignmentService = assignmentService;
             this.submissionService = submissionService;
         }
+
         public async Task<IActionResult> Index(int courseId)
         {
             try
