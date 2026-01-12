@@ -16,5 +16,8 @@ namespace EnglishCenterMVC.Data
         public virtual DbSet<Section> Sections{ get; set; }
         public virtual DbSet<Assignment> Assignments { get; set; }
         public virtual DbSet<Submission> Submissions { get; set; }
+        public virtual DbSet<Classes> Classes { get; set; }
+        public virtual DbSet<LessonProgress> LessonProgresses { get; set; }
+        public virtual DbSet<Material> Materials{ get; set; }
     }
 }

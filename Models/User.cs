@@ -9,5 +9,8 @@ namespace EnglishCenterMVC.Models
         public string? Avatar { get; set; }
         public string? Address { get; set; }
         public bool? IsDeleted { get; set; } = false;
+
+        public ICollection<Classes> Classes { get; set; }
+
     }
 }

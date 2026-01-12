@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EnglishCenterMVC.Models;
 using EnglishCenterMVC.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
     [Area("Student")]
+    [Authorize]
     public class CoursesController : Controller
     {
         ICourseService courseService;
@@ -19,9 +22,10 @@ namespace EnglishCenterMVC.Areas.Student.Controllers
             this.categoryService = category;
         }
 
-        public async Task<IActionResult> Index(string name = "")
+        public async Task<IActionResult> Index()
         {
-            var course = await courseService.GetCourses(name);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var course = await courseService.GetByUserId(userId);
             return View(course);
         }
 

@@ -123,6 +123,14 @@
                     </li>
 
                     <li class="menu-item">
+                        <a asp-controller="Classes" asp-action="Index" class="menu-link">
+                            <i class='menu-icon tf-icons bx  bxs-calendar-exclamation'></i>
+                            <div data-i18n="Analytics">Classes</div>
+                        </a>
+                    </li>
+
+
+                    <li class="menu-item">
                         <form asp-controller="Auth" asp-area="" asp-action="Logout" id="logout" method="post" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-log-out"></i>
                             <a data-i18n="Analytics" onclick="document.getElementById('logout').submit()">
