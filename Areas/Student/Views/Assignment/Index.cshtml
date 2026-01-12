@@ -1,235 +1,287 @@
-﻿@{
+﻿@model EnglishCenterMVC.Areas.Student.Models.AssignmentVM
+@using System.Linq
+@using System
+
+@{
     ViewData["Title"] = "Assignment";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
-    var now = DateTime.Now;
 
+    var now = DateTime.Now;
     var newWindowDays = 3;
-    string FriendlyType(SubmitType? t) => string.IsNullOrWhiteSpace(t.ToString()) ? "Submission" : t.ToString().Trim();
+
+    string FriendlyType(SubmitType? t)
+        => string.IsNullOrWhiteSpace(t?.ToString()) ? "Submission" : t.ToString().Trim();
 }
-@model EnglishCenterMVC.Areas.Student.Models.AssignmentVM
 
 <head>
     <link rel="stylesheet" href="~/css/ass.css" />
 </head>
-<body>
-    <div class="wrap">
-        <!-- Hero -->
-        <div class="hero">
-            <div class="hero-inner">
-                <div>
-                    <div class="hero-title">Study, study more, study forever!</div>
-                    <div class="hero-sub">Tập hợp bài tập tự học. Hãy hoàn thành trước hạn nộp!</div>
-                    <div class="pillrow">
-                        <span class="pill">Mới đăng lên: @Model.NewlyUploaded</span>
-                        <span class="pill">Có sẵn: @Model.Available</span>
-                        <span class="pill">Quá hạn: @Model.OverdueAssignments.Count()</span>
-                    </div>
+
+<div class="wrap">
+
+    <!-- Hero --><div class="hero">
+        <div class="hero-inner" style="gap:16px;">
+            <!-- Left -->
+            <div style="min-width:0;">
+                <div class="hero-title" style="display:flex; align-items:center; gap:10px;">
+                    <span style="display:inline-flex; width:38px; height:38px; border-radius:14px;
+                             border:1px solid var(--border); align-items:center; justify-content:center;">
+                        📌
+                    </span>
+                    <span>Assignments Hub</span>
                 </div>
-                <div class="pill">Student Area</div>
+
+                <div class="hero-sub" style="margin-top:6px;">
+                    Tổng hợp bài tập theo trạng thái — ưu tiên bài sắp đến hạn trước để khỏi “cháy KPI”. 🙂
+                </div>
+
+                <div class="pillrow" style="margin-top:12px;">
+                    <span class="pill">Mới đăng: <strong>@Model.NewlyUploaded</strong></span>
+                    <span class="pill">Đang mở: <strong>@Model.Available</strong></span>
+                    <span class="pill">Quá hạn: <strong>@Model.OverdueAssignments.Count()</strong></span>
+                </div>
+            </div>
+
+            <!-- Right -->
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                <span class="pill">Student Area</span>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                    <a class="btnx"
+                       asp-area="Student"
+                       asp-controller="Submission"
+                       asp-action="Index">
+                        My Submissions
+                    </a>
+                </div>
             </div>
         </div>
-
-        <!-- Tabs (future-proof) -->
-        <div class="tabs" role="tablist" aria-label="Assignments tabs">
-            <button class="tab active" type="button"
-                    role="tab" aria-selected="true"
-                    aria-controls="panel-online" id="tab-online"
-                    data-target="panel-online">
-                Bài tập online
-            </button>
-
-            <button class="tab" type="button"
-                    role="tab" aria-selected="false"
-                    aria-controls="panel-overdue" id="tab-overdue"
-                    data-target="panel-overdue">
-                Quá hạn
-            </button>
-
-            @* <button class="tab" type="button"
-                    role="tab" aria-selected="false"
-                    aria-controls="panel-submissions" id="tab-submissions"
-                    data-target="panel-submissions">
-                Bài nộp
-            </button> *@
-        </div>
+    </div>
 
 
-        <div class="grid">
+    <!-- Tabs -->
+    <div class="tabs" role="tablist" aria-label="Assignments tabs">
+        <button class="tab active" type="button"
+                role="tab" aria-selected="true"
+                aria-controls="panel-online" id="tab-online"
+                data-target="panel-online">
+            Đang mở
+        </button>
+
+        <button class="tab" type="button"
+                role="tab" aria-selected="false"
+                aria-controls="panel-overdue" id="tab-overdue"
+                data-target="panel-overdue">
+            Quá hạn
+        </button>
+    </div>
+
+    <div class="grid">
+
+        <!-- MAIN -->
+        <div>
+
+            <!-- OPEN -->
             <section id="panel-online" class="tab-panel" role="tabpanel" aria-labelledby="tab-online">
-                <div class="cardx card-pad">
+
+                <!-- Section: Online assignments -->
+                <div class="cardx card-pad" style="margin-bottom:14px;">
                     <div class="hrow">
-                        <h3>Danh sách bài</h3>
-                        <div class="muted">Thời hạn trong @newWindowDays ngày</div>
+                        <h3>Bài tập online</h3>
+                        <div class="muted">Vào làm trực tiếp • tự động khóa khi quá hạn</div>
                     </div>
 
-                    @if (Model.AvailableAssignments.Count() == 0)
+                    @{
+                        var onlineList = (Model.AvailableAssignments ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
+                        .Where(a => a != null && a.TypeSubmit == SubmitType.ONLINE)
+                        .ToList();
+                    }
+
+                    @if (!onlineList.Any())
                     {
                         <div class="muted" style="margin-top:10px;">Hiện tại chưa có bài tập online.</div>
                     }
                     else
                     {
                         <div class="alist">
-                            @foreach (var a in Model.AvailableAssignments)
+                            @foreach (var a in onlineList)
                             {
-                                @if(a.TypeSubmit == SubmitType.ONLINE)
-                                {
-                                    var daysLeft = (a.Deadline - now).TotalDays;
-                                    var isOverdue = a.Deadline < now;
-                                    var isSoon = !isOverdue && daysLeft <= 2;
+                                var daysLeft = (a.Deadline - now).TotalDays;
+                                var isOverdue = a.Deadline < now;
+                                var isSoon = !isOverdue && daysLeft <= 2;
 
-                                    <div class="a">
-                                        <div class="a-left">
-                                            <div class="ico">✦</div>
-                                            <div class="a-text">
-                                                <div class="a-title" title="@a.Title">@a.Title</div>
-                                                <div class="a-desc">Course #@a.CourseId : @a.Description</div>
+                                <div class="a">
+                                    <div class="a-left">
+                                        <div class="ico">✦</div>
+                                        <div class="a-text">
+                                            <div class="a-title" title="@a.Title">@a.Title</div>
+                                            <div class="a-desc">Course #@a.CourseId : @a.Description</div>
 
-                                                <div class="meta">
-                                                    @if (isOverdue)
-                                                    {
-                                                        <span class="tag danger">Đã hết hạn</span>
-                                                    }
-                                                    else if (isSoon)
-                                                    {
+                                            <div class="meta">
+                                                @if (isOverdue)
+                                                {
+                                                    <span class="tag danger">Đã hết hạn</span>
+                                                }
+                                                else if (isSoon)
+                                                {
+                                                    <span class="tag warn">Sắp quá hạn</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="tag ok">Đang mở</span>
+                                                }
 
-                                                        <span class="tag warn">Sắp quá hạn</span>
-                                                    }
-                                                    else
-                                                    {
-
-                                                        <span class="tag ok">Làm bài</span>
-                                                    }
-
-                                                    @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
-                                                    {
-                                                        <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                                    }
-                                                </div>
+                                                @if (a.UpdateAt != default(DateTime) && a.UpdateAt > a.CreateAt)
+                                                {
+                                                    <span class="tag">Updated: @a.UpdateAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                                }
                                             </div>
-                                        </div>
-
-                                        <div class="a-right">
-                                            <div class="time">
-                                                Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
-                                                Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
-                                            </div>
-                                            <a class="btnx primary"
-                                               asp-area="Student"
-                                               asp-controller="Assignment"
-                                               asp-action="Details"
-                                               asp-route-id="@a.Id">
-                                                Làm bài
-                                            </a>
                                         </div>
                                     </div>
-                                }
-                                else
-                                {
-                                    var isOverdue = a.Deadline < now;
-                                    var daysLeft = (a.Deadline - now).TotalDays;
-                                    var isSoon = !isOverdue && daysLeft <= 2;
 
-                                    var hasFile = !string.IsNullOrWhiteSpace(a.FileUrl);
-
-                                    <div class="a">
-                                        <div class="a-left">
-                                            <div class="ico">⬇</div>
-                                            <div class="a-text">
-                                                <div class="a-title" title="@a.Title">@a.Title</div>
-                                                <div class="a-desc">Course #@a.CourseId : @a.Description</div>
-
-                                                <div class="meta">
-
-                                                    @if (isOverdue)
-                                                    {
-                                                        <span class="tag danger">Đã quá hạn</span>
-                                                    }
-                                                    else if (isSoon)
-                                                    {
-                                                        <span class="tag warn">Sắp quá hạn</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="tag ok">Còn hạn</span>
-                                                    }
-
-                                                    @if (a.AllowResubmit)
-                                                    {
-                                                        <span class="tag ok">Cho nộp lại</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="tag gray">Không nộp lại</span>
-                                                    }
-                                                </div>
-                                            </div>
+                                    <div class="a-right">
+                                        <div class="time">
+                                            Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
+                                            Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
                                         </div>
-
-                                        <div class="a-right">
-                                            <div class="time">
-                                                Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
-                                                Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
-                                            </div>
-                                            <!-- Download -->
-                                            <a class="btnx"
-                                               href="@(hasFile? Url.Content(a.FileUrl) : "javascript:void(0)")"
-                                               target="_blank"
-                                               style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
-                                                Download
-                                            </a>
-                                            <!-- Submit (compact) -->
-                                            <form asp-area="Student"
-                                                  asp-controller="Assignment"
-                                                  asp-action="SubmitFile"
-                                                  method="post"
-                                                  enctype="multipart/form-data"
-                                                  class="subrow">
-
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="assignmentId" value="@a.Id" />
-
-                                                <!-- Dropzone -->
-                                                <div class="dz dz-compact @(isOverdue ? "dz-disabled" : "")" data-dz>
-                                                    <input type="file"
-                                                           id="file_@a.Id"
-                                                           name="submissionFile"
-                                                           class="dz-input"
-                                                           accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg"
-                                                           @(isOverdue ? "disabled" : "") />
-
-                                                    <label class="dz-box" for="file_@a.Id">
-                                                        <span class="dz-ico">📎</span>
-                                                        <span class="dz-title">Gửi bài làm</span>
-                                                        <span class="dz-meta" data-dz-meta>Chưa chọn file</span>
-                                                    </label>
-
-                                                    <button class="dz-clear" type="button" data-dz-clear title="Clear" style="display:none;">✕</button>
-                                                </div>
-
-                                                <!-- Submit -->
-                                                <button class="btnx primary"
-                                                        type="submit"
-                                                        id="btnSubmit_@a.Id"
-                                                        disabled
-                                                        style="opacity:.55; cursor:not-allowed; @(isOverdue ? "pointer-events:none;" : "")">
-                                                    @(a.AllowResubmit ? "Nộp lại" : "Nộp bài")
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <a class="btnx primary"
+                                           asp-area="Student"
+                                           asp-controller="Assignment"
+                                           asp-action="Details"
+                                           asp-route-id="@a.Id">
+                                            Làm bài
+                                        </a>
                                     </div>
-                                }
+                                </div>
                             }
                         </div>
                     }
                 </div>
 
+                <!-- Section: File assignments -->
+                <div class="cardx card-pad">
+                    <div class="hrow">
+                        <h3>Bài tập nộp file</h3>
+                        <div class="muted">Tải đề • nộp bài • theo dõi trạng thái</div>
+                    </div>
+
+                    @{
+                        var fileList = (Model.AvailableAssignments ?? Enumerable.Empty<EnglishCenterMVC.Models.Assignment>())
+                        .Where(a => a != null && a.TypeSubmit != SubmitType.ONLINE)
+                        .ToList();
+                    }
+
+                    @if (!fileList.Any())
+                    {
+                        <div class="muted" style="margin-top:10px;">Hiện tại chưa có bài nộp file.</div>
+                    }
+                    else
+                    {
+                        <div class="alist">
+                            @foreach (var a in fileList)
+                            {
+                                var isOverdue = a.Deadline < now;
+                                var daysLeft = (a.Deadline - now).TotalDays;
+                                var isSoon = !isOverdue && daysLeft <= 2;
+                                var hasFile = !string.IsNullOrWhiteSpace(a.FileUrl);
+
+                                <div class="a">
+                                    <div class="a-left">
+                                        <div class="ico">⬇</div>
+                                        <div class="a-text">
+                                            <div class="a-title" title="@a.Title">@a.Title</div>
+                                            <div class="a-desc">Course #@a.CourseId : @a.Description</div>
+
+                                            <div class="meta">
+                                                @if (isOverdue)
+                                                {
+                                                    <span class="tag danger">Đã quá hạn</span>
+                                                }
+                                                else if (isSoon)
+                                                {
+                                                    <span class="tag warn">Sắp quá hạn</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="tag ok">Còn hạn</span>
+                                                }
+
+                                                @if (a.AllowResubmit)
+                                                {
+                                                    <span class="tag ok">Cho nộp lại</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="tag gray">Không nộp lại</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="a-right">
+                                        <div class="time">
+                                            Created: @a.CreateAt.ToString("dd/MM/yyyy")<br />
+                                            Due: @a.Deadline.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+
+                                        <!-- Download -->
+                                        <a class="btnx"
+                                           href="@(hasFile? Url.Content(a.FileUrl) : "javascript:void(0)")"
+                                           target="_blank"
+                                           style="@(hasFile ? "" : "opacity:.45; pointer-events:none;")">
+                                            Download
+                                        </a>
+
+                                        <!-- Submit (compact) -->
+                                        <form asp-area="Student"
+                                              asp-controller="Assignment"
+                                              asp-action="SubmitFile"
+                                              method="post"
+                                              enctype="multipart/form-data"
+                                              class="subrow">
+
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="assignmentId" value="@a.Id" />
+
+                                            <div class="dz dz-compact @(isOverdue ? "dz-disabled" : "")" data-dz>
+                                                <input type="file"
+                                                       id="file_@a.Id"
+                                                       name="submissionFile"
+                                                       class="dz-input"
+                                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg"
+                                                       @(isOverdue ? "disabled" : "") />
+
+                                                <label class="dz-box" for="file_@a.Id">
+                                                    <span class="dz-ico">📎</span>
+                                                    <span class="dz-title">Gửi bài làm</span>
+                                                    <span class="dz-meta" data-dz-meta>Chưa chọn file</span>
+                                                </label>
+
+                                                <button class="dz-clear" type="button" data-dz-clear title="Clear" style="display:none;">✕</button>
+                                            </div>
+
+                                            <button class="btnx primary"
+                                                    type="submit"
+                                                    id="btnSubmit_@a.Id"
+                                                    disabled
+                                                    style="opacity:.55; cursor:not-allowed; @(isOverdue ? "pointer-events:none;" : "")">
+                                                @(a.AllowResubmit ? "Nộp lại" : "Nộp bài")
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </section>
 
+            <!-- OVERDUE -->
             <section id="panel-overdue" class="tab-panel" role="tabpanel" aria-labelledby="tab-overdue">
                 <div class="cardx card-pad">
                     <div class="hrow">
                         <h3>Quá hạn</h3>
-                        <div class="muted">Tài liệu tự học tự chấm</div>
+                        <div class="muted">Chỉ tải tài liệu (nếu còn) • nộp bài sẽ bị khóa</div>
                     </div>
 
                     @if (!Model.OverdueAssignments.Any())
@@ -275,157 +327,156 @@
                         </div>
                     }
                 </div>
-
             </section>
 
-            <section id="panel-submissions" class="tab-panel" role="tabpanel" aria-labelledby="tab-submissions">
-                <div class="cardx card-pad">
-                    Hello
-                </div>
-            </section>
-
-            <div class="cardx widget">
-            @* keep your existing sidebar markup exactly *@
-                <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                    <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
-                    <span class="tag">Hôm nay</span>
-                </div>
-
-                <div class="stat">
-                    <span class="muted">Bài mới</span>
-                    <strong>@Model.NewlyUploaded</strong>
-                </div>
-
-                <div class="stat">
-                    <span class="muted">Bài tập sẵn có</span>
-                    <strong>@Model.AvailableAssignments.Count()</strong>
-                </div>
-
-                <div class="stat">
-                    <span class="muted">Bài tập quá hạn</span>
-                    <strong style="color:var(--danger);">@Model.OverdueAssignments.Count()</strong>
-                </div>
-
-                <a class="btnx primary mb-2" asp-area="Student" asp-controller="Courses asp-action="Index">Tới Khóa học</a>
-                <a class="btnx" asp-area="Student" asp-controller="Home" asp-action="Index">Về trang chủ</a>
-
-                <div class="muted" style="margin-top:10px; line-height:1.5;">
-                    Tip: if an assignment shows “Updated”, re-check the file — instructors love last-minute “minor edits”.
-                </div>
-            </div>
         </div>
 
-    </div>
-    <script>
-        (function () {
-          const tabs = Array.from(document.querySelectorAll(".tabs .tab[role='tab']:not([disabled])"));
-          const panels = Array.from(document.querySelectorAll(".tab-panel[role='tabpanel']"));
+        <!-- SIDEBAR -->
+        <div class="cardx widget">
+            <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <h3 style="margin:0; font-weight:900;">Tổng quan</h3>
+                <span class="tag">Hôm nay</span>
+            </div>
 
-          function activate(tab) {
+            <div class="stat">
+                <span class="muted">Bài mới</span>
+                <strong>@Model.NewlyUploaded</strong>
+            </div>
+
+            <div class="stat">
+                <span class="muted">Bài đang mở</span>
+                <strong>@(Model.AvailableAssignments?.Count() ?? 0)</strong>
+            </div>
+
+            <div class="stat">
+                <span class="muted">Bài quá hạn</span>
+                <strong style="color:var(--danger);">@Model.OverdueAssignments.Count()</strong>
+            </div>
+            <div class="justify-content-between me-3">
+                <a class="btnx primary mb-2"
+                   asp-area="Student"
+                   asp-controller="Courses"
+                   asp-action="Index">
+                    Tới Khóa học
+                </a>
+
+                <a class="btnx"
+                   asp-area="Student"
+                   asp-controller="Home"
+                   asp-action="Index">
+                    Về trang chủ
+                </a>
+            </div>
+
+            <div class="muted" style="margin-top:10px; line-height:1.5;">
+                Tip: Nếu thấy “Updated”, hãy tải lại đề — đôi khi “minor edits” là… đổi hết bài. 🙂
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const tabs = Array.from(document.querySelectorAll(".tabs .tab[role='tab']:not([disabled])"));
+        const panels = Array.from(document.querySelectorAll(".tab-panel[role='tabpanel']"));
+
+        function activate(tab) {
             tabs.forEach(t => {
-              const isActive = t === tab;
-              t.classList.toggle("active", isActive);
-              t.setAttribute("aria-selected", isActive ? "true" : "false");
+                const isActive = t === tab;
+                t.classList.toggle("active", isActive);
+                t.setAttribute("aria-selected", isActive ? "true" : "false");
             });
 
             const targetId = tab.getAttribute("data-target");
             panels.forEach(p => p.hidden = (p.id !== targetId));
-          }
+        }
 
-          tabs.forEach(tab => tab.addEventListener("click", () => activate(tab)));
+        tabs.forEach(tab => tab.addEventListener("click", () => activate(tab)));
 
-          // default
-          const first = tabs.find(t => t.classList.contains("active")) || tabs[0];
-          if (first) activate(first);
-        })();
-                (function () {
-          function setBtnState(dz, enabled){
+        const first = tabs.find(t => t.classList.contains("active")) || tabs[0];
+        if (first) activate(first);
+    })();
+
+    (function () {
+        function setBtnState(dz, enabled) {
             const btn = dz.closest("form")?.querySelector("button[type='submit']");
             if (!btn) return;
 
             btn.disabled = !enabled;
             if (btn.disabled) {
-              btn.style.opacity = ".55";
-              btn.style.cursor = "not-allowed";
+                btn.style.opacity = ".55";
+                btn.style.cursor = "not-allowed";
             } else {
-              btn.style.opacity = "";
-              btn.style.cursor = "";
+                btn.style.opacity = "";
+                btn.style.cursor = "";
             }
-          }
+        }
 
-          document.querySelectorAll("[data-dz]").forEach(dz => {
+        document.querySelectorAll("[data-dz]").forEach(dz => {
             const input = dz.querySelector(".dz-input");
             if (!input) return;
 
-            // If overdue (input disabled), keep submit disabled forever
             if (input.disabled) {
-              setBtnState(dz, false);
-              return;
+                setBtnState(dz, false);
+                return;
             }
 
             const update = () => {
-              const hasFile = input.files && input.files.length > 0;
-              setBtnState(dz, hasFile);
+                const hasFile = input.files && input.files.length > 0;
+                setBtnState(dz, hasFile);
             };
 
             input.addEventListener("change", update);
-
-            // If you allow drag-drop into the label, this covers it too
             dz.addEventListener("drop", () => setTimeout(update, 0));
-
-            // init state
             update();
-          });
-        })();
-                (function () {
-          function humanSize(bytes){
-            const units = ["B","KB","MB","GB"];
+        });
+    })();
+
+    (function () {
+        function humanSize(bytes) {
+            const units = ["B", "KB", "MB", "GB"];
             let i = 0, n = bytes || 0;
             while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
             return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-          }
+        }
 
-          document.querySelectorAll("[data-dz]").forEach(dz => {
+        document.querySelectorAll("[data-dz]").forEach(dz => {
             const input = dz.querySelector(".dz-input");
-            const meta  = dz.querySelector("[data-dz-meta]");
+            const meta = dz.querySelector("[data-dz-meta]");
             const clear = dz.querySelector("[data-dz-clear]");
             const submitBtn = dz.closest("form")?.querySelector("button[type='submit']");
 
             if (!input || !meta) return;
 
             function updateUI() {
-              const f = input.files && input.files[0];
+                const f = input.files && input.files[0];
 
-              if (!f) {
-                meta.textContent = "Chưa chọn file";
-                dz.classList.remove("dz-hasfile");
-                if (clear) clear.style.display = "none";
-                if (submitBtn) submitBtn.disabled = true;
-                return;
-              }
+                if (!f) {
+                    meta.textContent = "Chưa chọn file";
+                    dz.classList.remove("dz-hasfile");
+                    if (clear) clear.style.display = "none";
+                    if (submitBtn) submitBtn.disabled = true;
+                    return;
+                }
 
-              meta.textContent = `${f.name} • ${humanSize(f.size)}`;
-              dz.classList.add("dz-hasfile");
-              if (clear) clear.style.display = "";
-              if (submitBtn) submitBtn.disabled = false;
+                meta.textContent = `${f.name} • ${humanSize(f.size)}`;
+                dz.classList.add("dz-hasfile");
+                if (clear) clear.style.display = "";
+                if (submitBtn) submitBtn.disabled = false;
             }
 
             input.addEventListener("change", updateUI);
-
-            // If your dropzone sets input.files on drop, this catches it:
             dz.addEventListener("drop", () => setTimeout(updateUI, 0));
 
             if (clear) {
-              clear.addEventListener("click", () => {
-                if (input.disabled) return;
-                input.value = "";
-                updateUI();
-              });
+                clear.addEventListener("click", () => {
+                    if (input.disabled) return;
+                    input.value = "";
+                    updateUI();
+                });
             }
 
             updateUI();
-          });
-        })();
-    </script>
-
-</body>
+        });
+    })();
+</script>

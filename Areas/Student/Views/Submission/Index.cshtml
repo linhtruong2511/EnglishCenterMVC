@@ -1,11 +1,10 @@
 ﻿@model IEnumerable<EnglishCenterMVC.Models.Submission>
 @using System.Linq
+@using System
 
 @{
     ViewData["Title"] = "My Submissions";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
-
-    var now = DateTime.Now;
 
     var list = (Model ?? Enumerable.Empty<EnglishCenterMVC.Models.Submission>())
         .OrderByDescending(x => x.SubmittedAt)
@@ -27,27 +26,56 @@
 <head>
     <link rel="stylesheet" href="~/css/ass.css" />
 </head>
+
 <body>
     <div class="wrap">
 
-        <!-- Hero -->
+        <!-- Hero (consistent style) -->
         <div class="hero">
-            <div class="hero-inner">
-                <div>
-                    <div class="hero-title">My Submissions</div>
-                    <div class="hero-sub">Theo dõi bài đã nộp, điểm và nhận xét (nếu đã chấm).</div>
-                    <div class="pillrow">
-                        <span class="pill">Tổng: @list.Count</span>
-                        <span class="pill">Đã chấm: @gradedCount</span>
-                        <span class="pill">Chờ chấm: @pendingCount</span>
+            <div class="hero-inner" style="gap:16px;">
+                <div style="min-width:0;">
+                    <div class="hero-title" style="display:flex; align-items:center; gap:10px;">
+                        <span style="display:inline-flex; width:38px; height:38px; border-radius:14px;
+                                     border:1px solid var(--border); align-items:center; justify-content:center;">
+                            📦
+                        </span>
+                        <span>My Submissions</span>
+                    </div>
+
+                    <div class="hero-sub" style="margin-top:6px;">
+                        Theo dõi bài đã nộp, điểm và nhận xét — gọn gàng kiểu “workflow”.
+                    </div>
+
+                    <div class="pillrow" style="margin-top:12px;">
+                        <span class="pill">Tổng: <strong>@list.Count</strong></span>
+                        <span class="pill">Đã chấm: <strong>@gradedCount</strong></span>
+                        <span class="pill">Chờ chấm: <strong>@pendingCount</strong></span>
                     </div>
                 </div>
-                <div class="pill">Student Area</div>
+
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                    <span class="pill">Student Area</span>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                        <a class="btnx primary"
+                           asp-area="Student"
+                           asp-controller="Assignment"
+                           asp-action="Index">
+                            My Assignments
+                        </a>
+                        <a class="btnx"
+                           asp-area="Student"
+                           asp-controller="Courses"
+                           asp-action="Index">
+                            Courses
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="grid">
-            <!-- LEFT: submissions list -->
+            <!-- LEFT -->
             <div class="cardx card-pad">
                 <div class="hrow">
                     <h3>Danh sách bài nộp</h3>
@@ -68,24 +96,17 @@
 
                             var title = s.Assignment?.Title ?? $"Assignment #{s.AssignmentId}";
                             var desc = s.Assignment?.Description;
+                            var shortDesc = string.IsNullOrWhiteSpace(desc)
+                            ? $"Submission #{s.Id}"
+                            : desc;
 
                             <div class="a">
                                 <div class="a-left">
                                     <div class="ico">@(graded ? "✓" : "⏳")</div>
 
                                     <div class="a-text">
-                                        <div class="a-title" title="@title">
-                                            @title
-                                        </div>
-
-                                        @if (!string.IsNullOrWhiteSpace(desc))
-                                        {
-                                            <div class="a-desc">@desc</div>
-                                        }
-                                        else
-                                        {
-                                            <div class="a-desc muted">Submission #@s.Id</div>
-                                        }
+                                        <div class="a-title" title="@title">@title</div>
+                                        <div class="a-desc" title="@shortDesc">@shortDesc</div>
 
                                         <div class="meta">
                                             <span class="tag gray">Submission #@s.Id</span>
@@ -97,7 +118,7 @@
                                                 <span class="tag">Score: @s.Score</span>
                                                 @if (!string.IsNullOrWhiteSpace(s.Feedback))
                                                 {
-                                                    <span class="tag">Feedback</span>
+                                                    <span class="tag ok">Has feedback</span>
                                                 }
                                             }
 
@@ -118,12 +139,12 @@
                                 </div>
 
                                 <div class="a-right">
-                                    <a class="btnx"
+                                    <a class="btnx primary"
                                        asp-area="Student"
                                        asp-controller="Submission"
                                        asp-action="Details"
                                        asp-route-subId="@s.Id">
-                                        Details
+                                        Open
                                     </a>
 
                                     <div class="time">
@@ -141,29 +162,31 @@
                 }
             </div>
 
-            <!-- RIGHT: quick actions -->
+            <!-- RIGHT -->
             <div class="cardx widget">
-                <div class="mb-2" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div class="mb-3" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                     <h3 style="margin:0; font-weight:900;">Quick actions</h3>
                     <span class="tag">Submissions</span>
                 </div>
 
-                <a class="btnx primary mb-2"
-                   asp-area="Student" asp-controller="Assignment" asp-action="Index">
+                <a class="btnx primary container-fluid"
+                   asp-area="Student"
+                   asp-controller="Assignment"
+                   asp-action="Index">
                     Quay lại Assignments
                 </a>
 
-                @* Change Courses -> Course if your controller name is CourseController *@
-                <a class="btnx"
-                   asp-area="Student" asp-controller="Courses" asp-action="Index">
-                    Tới Khóa học
+                <a class="btnx container-fluid"
+                   asp-area="Student"
+                   asp-controller="Courses"
+                   asp-action="Index">
+                    Tới Courses
                 </a>
 
                 <div class="muted" style="margin-top:10px; line-height:1.5;">
-                    Tip: Pending lâu quá thì giảng viên đang “review” theo chuẩn doanh nghiệp. 😄
+                    Tip: Pending lâu không đồng nghĩa thất bại — đôi khi chỉ là “approval pipeline”. 😄
                 </div>
             </div>
-
         </div>
     </div>
 </body>

@@ -1,6 +1,302 @@
-﻿namespace EnglishCenterMVC.wwwroot.css
-{
-    public class display
-    {
+﻿/* =========================
+   Courses Index UI
+   Works with: .course-wrap, .course-top, .toolbar, .grid, .course-card
+   Depends on your global: .cardx .btnx .muted .tag .pill (optional)
+========================= */
+
+.course-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 18px 40px;
+}
+
+/* ---------- HERO / TOP ---------- */
+.course-hero {
+    border-radius: 22px;
+    padding: 18px;
+    margin-bottom: 14px;
+}
+
+.course-hero-inner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    padding: 18px 18px 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+    /* soft “hero” background without nuking your theme */
+    background: radial-gradient(900px 260px at 12% 0%, rgba(59,130,246,.18), transparent 58%), radial-gradient(700px 260px at 88% 0%, rgba(16,185,129,.14), transparent 55%), linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
+}
+
+.course-hero-left {
+    position: relative;
+    z-index: 1;
+    max-width: 68%;
+    min-width: 0;
+}
+
+.course-hero-title {
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -.4px;
+}
+
+.course-hero-sub {
+    margin: 6px 0 0;
+    line-height: 1.45;
+}
+
+.course-hero-right {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    min-width: 280px;
+}
+
+.course-search {
+    width: 320px;
+    max-width: 44vw;
+}
+
+    .course-search input[type="search"] {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,.92);
+        border-radius: 14px;
+        padding: 11px 12px;
+        outline: none;
+        font-weight: 700;
+    }
+
+        .course-search input[type="search"]:focus {
+            box-shadow: 0 0 0 4px rgba(59,130,246,.14);
+            border-color: rgba(59,130,246,.45);
+        }
+
+/* Decorative art (optional, inline svg container) */
+.course-hero-art {
+    position: absolute;
+    right: 14px;
+    top: 10px;
+    width: 240px;
+    height: 120px;
+    opacity: .95;
+    pointer-events: none;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.08));
+}
+
+/* ---------- TOOLBAR (chips) ---------- */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0 16px;
+}
+
+.chip {
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.9);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-weight: 800;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .05s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+    .chip:hover {
+        box-shadow: 0 10px 18px rgba(0,0,0,.06);
+    }
+
+    .chip:active {
+        transform: translateY(1px);
+    }
+
+    .chip.active {
+        border-color: rgba(59,130,246,.5);
+        box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+    }
+
+/* ---------- GRID ---------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    align-items: stretch;
+}
+
+@media (max-width: 1100px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .course-hero-left {
+        max-width: 62%;
     }
 }
+
+@media (max-width: 760px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .course-hero-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .course-hero-left {
+        max-width: 100%;
+    }
+
+    .course-hero-right {
+        align-items: stretch;
+        min-width: 0;
+    }
+
+    .course-search {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .course-hero-art {
+        display: none;
+    }
+}
+
+/* ---------- COURSE CARD ---------- */
+.course-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+    .course-card .thumb {
+        height: 170px;
+        border-bottom: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        background: radial-gradient(700px 140px at 20% 0%, rgba(59,130,246,.12), transparent 55%), linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88));
+    }
+
+        .course-card .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .course-card .body {
+        padding: 14px 14px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 160px;
+    }
+
+    .course-card .name {
+        font-weight: 950;
+        letter-spacing: -.2px;
+        line-height: 1.15;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .course-card .desc {
+        color: rgba(0,0,0,.65);
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 44px;
+    }
+
+    /* meta pills */
+    .course-card .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .course-card .pill {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-weight: 800;
+        font-size: .86rem;
+        background: rgba(255,255,255,.9);
+    }
+
+/* price */
+.price-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.price {
+    font-weight: 950;
+    font-size: 1.08rem;
+}
+
+    .price .old {
+        margin-left: 10px;
+        font-weight: 800;
+        font-size: .92rem;
+        opacity: .55;
+        text-decoration: line-through;
+    }
+
+.sale {
+    border: 1px solid rgba(239,68,68,.35);
+    color: rgba(239,68,68,.95);
+    background: rgba(239,68,68,.08);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-weight: 950;
+}
+
+/* buttons row */
+.btnrow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 14px 14px;
+}
+
+    .btnrow .btnx {
+        width: 100%;
+        text-align: center;
+    }
+
+/* empty state */
+.empty {
+    border: 1px dashed rgba(0,0,0,.18);
+    border-radius: 18px;
+    padding: 18px;
+    background: rgba(255,255,255,.85);
+}
+
+.course-card .thumb {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    overflow: hidden;
+    position: relative;
+}
+
+    .course-card .thumb img {
+        width: 100%;
+        height: 100% !important;
+        object-fit: cover;
+        display: block;
+    }
