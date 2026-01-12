@@ -1,5 +1,6 @@
 ﻿using EnglishCenterMVC.Areas.Student.Models;
 using EnglishCenterMVC.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
     [Area("Student")]
+    [Authorize]
     public class AssignmentController : Controller
     {
         IAssignmentService assignmentService;

@@ -2,10 +2,12 @@
 using EnglishCenterMVC.Services;
 using EnglishCenterMVC.Areas.Student.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
     [Area("Student")]
+    [Authorize]
     public class SectionController : Controller
     {
         ISectionService sectionService;

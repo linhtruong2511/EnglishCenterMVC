@@ -1,9 +1,11 @@
 ﻿using EnglishCenterMVC.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
     [Area("Student")]
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly DataContext _context;

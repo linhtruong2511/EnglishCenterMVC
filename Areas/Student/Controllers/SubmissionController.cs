@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EnglishCenterMVC.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EnglishCenterMVC.Areas.Student.Controllers
 {
     [Area("Student")]
+    [Authorize]
     public class SubmissionController : Controller
     {
         ISubmissionService submissionService;
