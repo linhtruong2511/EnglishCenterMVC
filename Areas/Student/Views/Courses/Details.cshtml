@@ -1,10 +1,11 @@
 ﻿@model EnglishCenterMVC.Models.Course
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Course Details";
     Layout = "~/Areas/Student/Views/Shared/_Layout.cshtml";
+
     var price = Model.Price;
-    var salePct = Model.Sale; 
+    var salePct = Model.Sale;
     var hasSale = salePct != null && salePct > 0;
     var finalPrice = hasSale ? price * (decimal)(100 - (decimal)salePct) / 100m : price;
 
@@ -12,159 +13,408 @@
     var categoryId = Model.Category?.Id ?? 0;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/ass.css" />
+    <link rel="stylesheet" href="~/css/display.css" />
+}
+
+<style>
+    /* ---- Course Details scoped (prevents ass.css / lessons.css collisions) ---- */
+    .cd-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 18px;
+    }
+
+    .cd-grid {
+        display: grid;
+        grid-template-columns: 2.1fr 1fr;
+        gap: 14px;
+        align-items: start;
+    }
+
+    .cd-card {
+        background: var(--card, #fff);
+        border: 1px solid var(--border, rgba(0,0,0,.10));
+        border-radius: 18px;
+        box-shadow: 0 6px 22px rgba(0,0,0,.04);
+    }
+
+    .cd-hero {
+        overflow: hidden;
+    }
+
+    .cd-hero-inner {
+        display: flex;
+        gap: 16px;
+        align-items: stretch;
+        padding: 18px;
+    }
+
+    .cd-hero-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+        .cd-hero-text h1 {
+            margin: 0;
+            font-weight: 950;
+            letter-spacing: -.4px;
+        }
+
+        .cd-hero-text p {
+            margin: 8px 0 0;
+            color: var(--muted, rgba(0,0,0,.62));
+            line-height: 1.55;
+        }
+
+    .cd-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .cd-chip {
+        border: 1px solid var(--border, rgba(0,0,0,.10));
+        background: #fff;
+        border-radius: 999px;
+        padding: 7px 10px;
+        font-weight: 800;
+        font-size: .85rem;
+    }
+
+    .cd-hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .cd-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted, rgba(0,0,0,.62));
+        font-weight: 800;
+        font-size: .9rem;
+    }
+
+    .cd-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(0,0,0,.35);
+        display: inline-block;
+    }
+
+    .cd-hero-thumb {
+        flex: 0 0 44%;
+        max-width: 44%;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--border, rgba(0,0,0,.10));
+        background: rgba(0,0,0,.04);
+        min-height: 260px;
+    }
+
+        .cd-hero-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+    .cd-side {
+        padding: 16px;
+        position: sticky;
+        top: 18px;
+    }
+    .cd-sale-badge {
+        display: inline-block;
+        background: rgba(239,68,68,.12);
+        border: 1px solid rgba(239,68,68,.25);
+        color: rgba(185,28,28,1);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 900;
+        margin-bottom: 10px;
+    }
+
+    .cd-price {
+        font-size: 1.8rem;
+        font-weight: 950;
+    }
+
+    .cd-old {
+        color: var(--muted, rgba(0,0,0,.62));
+        text-decoration: line-through;
+        margin-top: 4px;
+        font-weight: 900;
+    }
+
+    .cd-divider {
+        border: none;
+        border-top: 1px solid var(--border, rgba(0,0,0,.10));
+        margin: 12px 0;
+    }
+
+    .cd-info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cd-info-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--border, rgba(0,0,0,.10));
+        border-radius: 14px;
+    }
+
+    .cd-info-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted, rgba(0,0,0,.62));
+        font-weight: 850;
+    }
+
+    .cd-info-ico {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        background: rgba(59,130,246,.25);
+    }
+
+    .cd-hint {
+        color: var(--muted, rgba(0,0,0,.62));
+        margin-top: 10px;
+        line-height: 1.55;
+    }
+
+    .cd-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .cd-tab {
+        border: 1px solid var(--border, rgba(0,0,0,.10));
+        background: #fff;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+        .cd-tab.active {
+            border-color: rgba(59,130,246,.35);
+            background: rgba(59,130,246,.10);
+        }
+
+    .cd-pane {
+        display: none;
+        margin-top: 12px;
+        padding: 16px;
+    }
+
+        .cd-pane.active {
+            display: block;
+        }
+
+    .cd-benefits {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .cd-benefit {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid var(--border, rgba(0,0,0,.10));
+        border-radius: 16px;
+    }
+
+    .cd-bico {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: rgba(16,185,129,.18);
+        border: 1px solid rgba(16,185,129,.25);
+    }
+
+    .cd-btitle {
+        font-weight: 950;
+    }
+</style>
+
 <div class="cd-wrap">
+
     <div class="cd-grid">
+
         <!-- LEFT: HERO -->
-        <div class="hero cardx">
-            <div class="hero-inner">
-                <div>
+        <div class="cd-card cd-hero">
+            <div class="cd-hero-inner">
+                <div class="cd-hero-text">
                     <h1>@Model.Name</h1>
                     <p>@Model.Description</p>
 
-                    <div class="chips">
-                        <span class="chip">Category: @categoryName (ID: @categoryId)</span>
+                    <div class="cd-chips">
+                        <span class="cd-chip">Category: @categoryName (ID: @categoryId)</span>
                         @if (hasSale)
                         {
-                            <span class="chip">Discount: -@salePct%</span>
+                            <span class="cd-chip">Discount: -@salePct%</span>
                         }
-                        <span class="chip">Thời hạn: Vô hạn</span>
+                        <span class="cd-chip">Thời hạn: Vô hạn</span>
                     </div>
 
-                    <div class="hero-meta">
-                        <div class="meta-item"><span class="dot"></span><span>~ 32 hours</span></div>
-                        <div class="meta-item"><span class="dot"></span><span>49 readings</span></div>
-                        <div class="meta-item"><span class="dot"></span><span>13 videos</span></div>
-                        <div class="meta-item"><span class="dot"></span><span>6 tests</span></div>
+                    <div class="cd-hero-meta">
+                        <div class="cd-meta-item"><span class="cd-dot"></span><span>~ 32 hours</span></div>
+                        <div class="cd-meta-item"><span class="cd-dot"></span><span>49 readings</span></div>
+                        <div class="cd-meta-item"><span class="cd-dot"></span><span>13 videos</span></div>
+                        <div class="cd-meta-item"><span class="cd-dot"></span><span>6 tests</span></div>
                     </div>
                 </div>
 
-                <div class="thumb">
+                <div class="cd-hero-thumb">
                     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
                     {
                         <img src="@Model.ImageUrl" alt="@Model.Name" />
                     }
                     else
                     {
-                        <span class="muted">No image</span>
+                        <div class="muted" style="padding:16px;">No image</div>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT: STUDENT VIEW CLASS (pricing block) -->
-        <div class="cardx side">
+        <!-- RIGHT: INFO / ACTIONS -->
+        <div class="cd-card cd-side">
             @if (hasSale)
             {
-                <span class="sale-badge">-@salePct%</span>
+                <span class="cd-sale-badge">-@salePct%</span>
             }
 
-            <div class="price">@finalPrice.ToString("N0")đ</div>
+            <div class="cd-price">@finalPrice.ToString("N0")đ</div>
             @if (hasSale)
             {
-                <div class="old">@price.ToString("N0") đ</div>
+                <div class="cd-old">@price.ToString("N0") đ</div>
             }
 
-            <hr class="divider" />
+            <hr class="cd-divider" />
 
-            <h4>Course Information</h4>
-            <ul class="info-list">
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Study time</span></div>
+            <h4 style="margin:0; font-weight:950;">Course Information</h4>
+            <div style="height:10px;"></div>
+
+            <ul class="cd-info-list">
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Study time</span></div>
                     <strong>32 giờ học</strong>
                 </li>
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Readings</span></div>
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Readings</span></div>
                     <strong>49 bài đọc</strong>
                 </li>
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Videos</span></div>
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Videos</span></div>
                     <strong>13 video</strong>
                 </li>
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Quizzes</span></div>
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Quizzes</span></div>
                     <strong>6 bài kiểm tra</strong>
                 </li>
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Practice</span></div>
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Practice</span></div>
                     <strong>57 bài luyện</strong>
                 </li>
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Access</span></div>
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Access</span></div>
                     <strong>Truy cập trọn đời</strong>
                 </li>
-                <li class="info-item">
-                    <div class="info-left"><span class="icon"></span><span>Certificate</span></div>
+                <li class="cd-info-item">
+                    <div class="cd-info-left"><span class="cd-info-ico"></span><span>Certificate</span></div>
                     <strong>Hoàn thành 80%</strong>
                 </li>
             </ul>
 
-            <hr class="divider" />
+            <hr class="cd-divider" />
 
             <a class="btnx primary" asp-controller="Section" asp-action="Index" asp-route-courseId="@Model.Id">Bắt đầu vào học</a>
-            <a class="btnx secondary" asp-action="Index">Quay lại</a>
+            <a class="btnx" asp-action="Index">Quay lại</a>
 
-            <div class="hint">
-                Tip: if you’re already enrolled, this button should take you to the next unfinished lesson.
-                If you’re not enrolled, your colleague can route it to “Enroll” behind the scenes.
+            <div class="cd-hint">
+                Tip: enrolled thì nút này nên dẫn tới lesson chưa hoàn thành gần nhất. Không enrolled thì route sang “Enroll”.
             </div>
         </div>
+
     </div>
 
-    <!-- Tabs row -->
-    <div class="tabs" role="tablist" aria-label="Course tabs">
-        <button class="tab active" type="button" data-tab="intro">Giới thiệu</button>
-        <button class="tab" type="button" data-tab="syllabus">Giáo trình</button>
-        <button class="tab" type="button" data-tab="reviews">Đánh giá</button>
-        <button class="tab" type="button" data-tab="cert">Chứng chỉ</button>
-        <button class="tab" type="button" data-tab="coupons">Mã ưu đãi của tôi</button>
+    <!-- Tabs -->
+    <div class="cd-tabs" role="tablist" aria-label="Course tabs">
+        <button class="cd-tab active" type="button" data-tab="intro">Giới thiệu</button>
+        <button class="cd-tab" type="button" data-tab="syllabus">Giáo trình</button>
+        <button class="cd-tab" type="button" data-tab="reviews">Đánh giá</button>
+        <button class="cd-tab" type="button" data-tab="cert">Chứng chỉ</button>
+        <button class="cd-tab" type="button" data-tab="coupons">Mã ưu đãi của tôi</button>
     </div>
 
     <!-- Intro -->
-    <div class="cardx section tab-pane active" id="tab-intro">
-        <h3>Quyền lợi của học viên</h3>
-        <div class="benefits">
-            <div class="benefit">
-                <div class="bicon"></div>
+    <div class="cd-card cd-pane active" id="cd-intro">
+        <h3 style="margin:0; font-weight:950;">Quyền lợi của học viên</h3>
+        <div style="height:12px;"></div>
+
+        <div class="cd-benefits">
+            <div class="cd-benefit">
+                <div class="cd-bico"></div>
                 <div>
-                    <div class="btitle">Nhận chứng chỉ</div>
+                    <div class="cd-btitle">Nhận chứng chỉ</div>
                     <div class="muted">Hoàn thành 80% khoá học để nhận chứng chỉ.</div>
                 </div>
             </div>
-            <div class="benefit">
-                <div class="bicon"></div>
+            <div class="cd-benefit">
+                <div class="cd-bico"></div>
                 <div>
-                    <div class="btitle">Thi định kỳ</div>
+                    <div class="cd-btitle">Thi định kỳ</div>
                     <div class="muted">Bài kiểm tra theo chủ đề để khóa kiến thức.</div>
                 </div>
             </div>
-            <div class="benefit">
-                <div class="bicon"></div>
+            <div class="cd-benefit">
+                <div class="cd-bico"></div>
                 <div>
-                    <div class="btitle">Truy cập linh hoạt</div>
+                    <div class="cd-btitle">Truy cập linh hoạt</div>
                     <div class="muted">Học mọi lúc mọi nơi, theo tiến độ cá nhân.</div>
                 </div>
             </div>
-            <div class="benefit">
-                <div class="bicon"></div>
+            <div class="cd-benefit">
+                <div class="cd-bico"></div>
                 <div>
-                    <div class="btitle">Nhiều phần quà</div>
+                    <div class="cd-btitle">Nhiều phần quà</div>
                     <div class="muted">Nhận thưởng khi hoàn thành các mốc.</div>
                 </div>
             </div>
         </div>
 
-        <hr class="divider" />
+        <hr class="cd-divider" />
 
-        <h3>Nội dung khoá học</h3>
-        <div class="muted">
-            @* Placeholder: your colleague can replace with real syllabus fields *@
+        <h3 style="margin:0; font-weight:950;">Nội dung khoá học</h3>
+        <div class="muted" style="margin-top:8px;">
             • Giới thiệu • Kỹ thuật cốt lõi • Bài tập thực hành • Giải thích chi tiết • Tổng kết
         </div>
 
-        <hr class="divider" />
+        <hr class="cd-divider" />
 
-        <h3>Ai nên tham gia?</h3>
-        <ul class="muted" style="margin:0; padding-left:18px; line-height:1.8;">
+        <h3 style="margin:0; font-weight:950;">Ai nên tham gia?</h3>
+        <ul class="muted" style="margin:8px 0 0; padding-left:18px; line-height:1.8;">
             <li>Học viên muốn cải thiện kỹ năng theo lộ trình rõ ràng.</li>
             <li>Người đang luyện thi theo mục tiêu (TOEIC/IELTS/HSK...).</li>
             <li>Người cần môi trường học có bài tập + đánh giá thường xuyên.</li>
@@ -172,33 +422,33 @@
     </div>
 
     <!-- Syllabus -->
-    <div class="cardx section tab-pane" id="tab-syllabus">
-        <h3>Giáo trình</h3>
-        <div class="muted">
+    <div class="cd-card cd-pane" id="cd-syllabus">
+        <h3 style="margin:0; font-weight:950;">Giáo trình</h3>
+        <div class="muted" style="margin-top:8px;">
             Placeholder: show modules / lessons list here (sections, lessons, duration).
         </div>
     </div>
 
     <!-- Reviews -->
-    <div class="cardx section tab-pane" id="tab-reviews">
-        <h3>Đánh giá</h3>
-        <div class="muted">
-            Placeholder: show average rating + comments. (Students only view; posting review can be gated.)
+    <div class="cd-card cd-pane" id="cd-reviews">
+        <h3 style="margin:0; font-weight:950;">Đánh giá</h3>
+        <div class="muted" style="margin-top:8px;">
+            Placeholder: show average rating + comments.
         </div>
     </div>
 
     <!-- Certificate -->
-    <div class="cardx section tab-pane" id="tab-cert">
-        <h3>Chứng chỉ</h3>
-        <div class="muted">
+    <div class="cd-card cd-pane" id="cd-cert">
+        <h3 style="margin:0; font-weight:950;">Chứng chỉ</h3>
+        <div class="muted" style="margin-top:8px;">
             Placeholder: certificate rules, progress %, and “View certificate” when eligible.
         </div>
     </div>
 
     <!-- Coupons -->
-    <div class="cardx section tab-pane" id="tab-coupons">
-        <h3>Mã ưu đãi của tôi</h3>
-        <div class="muted">
+    <div class="cd-card cd-pane" id="cd-coupons">
+        <h3 style="margin:0; font-weight:950;">Mã ưu đãi của tôi</h3>
+        <div class="muted" style="margin-top:8px;">
             Placeholder: list available coupons for this student.
         </div>
     </div>
@@ -207,13 +457,13 @@
 
 <script>
     (function () {
-        const tabs = document.querySelectorAll(".tab");
+        const tabs = document.querySelectorAll(".cd-tab");
         const panes = {
-            intro: document.getElementById("tab-intro"),
-            syllabus: document.getElementById("tab-syllabus"),
-            reviews: document.getElementById("tab-reviews"),
-            cert: document.getElementById("tab-cert"),
-            coupons: document.getElementById("tab-coupons")
+            intro: document.getElementById("cd-intro"),
+            syllabus: document.getElementById("cd-syllabus"),
+            reviews: document.getElementById("cd-reviews"),
+            cert: document.getElementById("cd-cert"),
+            coupons: document.getElementById("cd-coupons")
         };
 
         tabs.forEach(t => {
@@ -224,9 +474,6 @@
                 const key = t.getAttribute("data-tab");
                 Object.values(panes).forEach(p => p.classList.remove("active"));
                 if (panes[key]) panes[key].classList.add("active");
-
-                // Optional: scroll to tabs section on mobile
-                // document.querySelector(".tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
             });
         });
     })();
